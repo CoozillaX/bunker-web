@@ -31,4 +31,4 @@ A backend service built with <b>Go, Gin, and GORM</b>, forming the server-side c
 ---
 
 ### Related Repositories
-- [Bunker-Web (Frontend)](https://github.com/Cynic158/PhoenixAuth-Web)
+- [Bunker-Web (Frontend)](https://github.com/Cynic158/Bunker-Web)
