@@ -19,7 +19,7 @@ jobs:
         with:
           repository: CoozillaX/bunker-core
           token: ${{ secrets.GH_PAT }}
-          path: bunker-dev/bunker-core
+          path: bunker-core
 
       - name: Setup go.work
         run: |
