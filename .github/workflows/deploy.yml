@@ -9,26 +9,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Prepare repos dir
+        run: mkdir -p bunker-dev
+
       - name: Checkout bunker-web
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          path: bunker-dev/bunker-web
 
       - name: Checkout bunker-core
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: CoozillaX/bunker-core
           token: ${{ secrets.GH_PAT }}
-          path: bunker-core
+          path: bunker-dev/bunker-core
 
       - name: Setup go.work
+        working-directory: bunker-dev
         run: |
-          go work init
-          go work use .
-          go work use ./bunker-core
-          echo "go.work configured"
+          go work init ./bunker-web ./bunker-core
+          echo "go.work configured:"
           cat go.work
 
       - name: Build backend
-        run: make
+        working-directory: bunker-dev/bunker-web
+        run: |
+          make
+          ls -lh build/
 
       - name: Upload binary to server
         uses: appleboy/scp-action@v0.1.7
@@ -36,7 +43,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "bunker-web-linux"
+          source: "bunker-dev/bunker-web/build/bunker-web-linux"
           target: "/home/deploy/app/"
 
       - name: Restart backend service
