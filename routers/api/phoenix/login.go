@@ -4,7 +4,6 @@ import (
 	"bunker-core/protocol/defines"
 	"bunker-core/protocol/g79"
 	"bunker-core/protocol/gameinfo"
-	"bunker-lite/utils"
 	"bunker-web/pkg/fbtoken"
 	"bunker-web/pkg/giner"
 	"bunker-web/pkg/sessions"
@@ -46,26 +45,26 @@ var versionCache = cache.New(24*time.Hour, time.Hour) // cache[serverCode]server
 func requestServerInfo(
 	mu *defines.MpayUser,
 	req *LoginRequest,
-) (*g79.G79User, *g79.RentalServerInfo, *defines.ProtocolError) {
+) (*g79.G79User, *g79.RentalServerInfo, *gin.Error) {
 	// change engine version by cache
 	engineVersion := gameinfo.DefaultEngineVersion
 	if value, ok := versionCache.Get(req.ServerCode); ok {
 		engineVersion = value.(string)
 	}
 	// g79 login
-	gu, protocolErr := utils.HandleG79Login(engineVersion, mu)
-	if protocolErr != nil {
-		return nil, nil, protocolErr
+	gu, ginerr := g79_utils.HandleG79Login(mu, &engineVersion)
+	if ginerr != nil {
+		return nil, nil, ginerr
 	}
 	// chain info
 	rentalInfo, protocolErr := gu.ImpactRentalServer(req.ServerCode, req.ServerPasscode, req.ClientPublicKey)
 	if protocolErr != nil {
-		return nil, nil, protocolErr
+		return nil, nil, giner.NewGinErrorFromProtocolErr(protocolErr)
 	}
 	// cache version
 	currentGameInfo, err := gameinfo.GetInfoByGameVersion(rentalInfo.MCVersion)
 	if err != nil {
-		return nil, nil, &defines.ProtocolError{Message: err.Error()}
+		return nil, nil, giner.NewPrivateGinError(err)
 	}
 	versionCache.SetDefault(req.ServerCode, currentGameInfo.EngineVersion)
 	// check version
@@ -127,9 +126,9 @@ func (*Phoenix) Login(c *gin.Context) {
 		return
 	}
 	// Query server info
-	gu, serverInfo, protocolErr := requestServerInfo(usr.HelperMpayUser.MpayUser, &req)
-	if protocolErr != nil {
-		c.Error(giner.NewPublicGinError(protocolErr.Message))
+	gu, serverInfo, ginerr := requestServerInfo(usr.HelperMpayUser.MpayUser, &req)
+	if ginerr != nil {
+		c.Error(ginerr)
 		return
 	}
 	// Owner ID check for normal limited users
