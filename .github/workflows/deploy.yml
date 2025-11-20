@@ -41,6 +41,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "bunker-web/build/bunker-web-linux"
           target: "/home/deploy/app/"
+          strip_components: 2
 
       - name: Restart backend service
         uses: appleboy/ssh-action@v1.0.3
