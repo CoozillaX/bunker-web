@@ -10,7 +10,7 @@ SRCS_GO := $(foreach dir, $(shell find $(ROOT_DIR) -type d), $(wildcard $(dir)/*
 
 RELEASE_DIR:=$(shell pwd)/build
 OUTPUT_DIR:=${RELEASE_DIR}
-EXEC_PREFIX:=phoenixauth-
+EXEC_PREFIX:=bunker-web-
 
 TYPE:=linux
 ${TYPE}_EXEC:=${OUTPUT_DIR}/${EXEC_PREFIX}${TYPE}
