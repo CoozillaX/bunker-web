@@ -183,11 +183,8 @@ func QueryUserByID(id uint) (*models.User, *gin.Error) {
 }
 
 func NormalLogin(username, saltedPassword string) (*models.User, *gin.Error) {
-	usr, ginerr := QueryByUsername(username)
-	if ginerr != nil {
-		return nil, giner.SetTranslationCode(ginerr, giner.C_Auth_InvalidUser)
-	}
-	if saltedPassword != usr.Password {
+	usr, _ := QueryByUsername(username)
+	if usr == nil || saltedPassword != usr.Password {
 		return nil, giner.SetTranslationCode(giner.NewPublicGinError("无效的用户中心用户名或密码"), giner.C_Auth_InvalidUser)
 	}
 	return usr, nil
