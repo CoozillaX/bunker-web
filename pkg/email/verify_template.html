@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BunkerWeb 邮箱验证码</title>
+</head>
+<body style="font-family: 'Arial', sans-serif; margin: 0; padding: 0;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">              
+        <div style="margin-top: 20px;">
+            <p>尊敬的 <strong>{{.Username}}</strong>：</p>
+            <p>您在 <strong>{{.Time}}</strong> 请求 <strong>{{.Action}}</strong></p>
+            <p>若要完成本次操作，请使用以下验证码 (10分钟内有效)：</p>
+            <p style="font-size: 20px; padding: 20px 0 20px 5px;"><strong>{{.Code}}</strong></p>
+            <p>如果您未授权本次操作，请忽略此邮件或前往 <a href="https://liliya233.uk">用户中心</a> 修改密码。</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+.vscode
+build
+*.exe
+*.log
+*_private.go
+__debug_*
+.DS_Store
+*.env

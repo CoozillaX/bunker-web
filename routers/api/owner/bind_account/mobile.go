@@ -1,0 +1,63 @@
+package bind_account
+
+import (
+	"bunker-web/models"
+	"bunker-web/pkg/giner"
+	"bunker-web/pkg/sessions"
+	"bunker-web/services/user"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+type MobileRequest struct {
+	Mobile  string `json:"mobile" binding:"len=11"`
+	SMSCode string `json:"smscode" binding:"omitempty,len=6"`
+}
+
+type MobileResponseData struct {
+	VerifyUrl string `json:"verify_url,omitempty"`
+}
+
+func (*BindAccount) Mobile(c *gin.Context) {
+	// Get session
+	bearer, _ := c.Get("bearer")
+	session, _ := sessions.GetSessionByBearer(bearer.(string))
+	u, _ := session.Load("usr")
+	usr := u.(*models.User)
+	// Parse request
+	var req MobileRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.Error(giner.NewPublicGinError("无效参数"))
+		return
+	}
+	// Check mpay user status
+	if usr.OwnerMpayUser == nil {
+		c.Error(giner.NewPublicGinError("请先获取手机验证码"))
+		return
+	} else if usr.OwnerMpayUser.MpayToken != "" {
+		c.Error(giner.NewPublicGinError("绑定失败, 已绑定游戏账号"))
+		return
+	}
+	// Store to DB
+	defer models.DBSave(usr.OwnerMpayUser)
+	// Try to login
+	helper, ginerr := user.GetLoginHelperForOwner(usr)
+	if ginerr != nil {
+		c.Error(ginerr)
+		return
+	}
+	if protocolErr := helper.SMSLogin(req.Mobile, req.SMSCode); protocolErr != nil {
+		c.JSON(http.StatusOK, giner.MakeHTTPResponse(false).
+			SetMessage(protocolErr.Message).
+			SetData(
+				&MobileResponseData{
+					VerifyUrl: protocolErr.VerifyUrl,
+				},
+			))
+		return
+	}
+	c.JSON(http.StatusOK, giner.MakeHTTPResponse(true).SetMessage("游戏账号绑定成功"))
+	// Create log
+	c.Set("log", "绑定Owner成功(手机)")
+}

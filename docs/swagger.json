@@ -1,0 +1,1086 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "BunkerWeb OpenAPI document, feel free to contact us if you have any questions or suggestions.",
+        "title": "BunkerWeb OpenAPI",
+        "contact": {}
+    },
+    "paths": {
+        "/openapi/helper/get_user_details": {
+            "post": {
+                "description": "通过uid获取玩家详细信息, 需要提供 API key\n注意: 此 API 会尝试进行游戏登录 (Helper)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "玩家"
+                ],
+                "summary": "获取玩家详细信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "此处需要填写 API Key, 可以从用户菜单获取",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求时需要在 Body 携带以下查询参数",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/helper.GetUserDetailsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时返回",
+                        "schema": {
+                            "$ref": "#/definitions/helper.GetUserDetailsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi/helper/get_user_state": {
+            "post": {
+                "description": "通过uid获取玩家状态信息, 例如主页点击数量, 需要提供 API key\n注意: 此 API 会尝试进行游戏登录 (Helper)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "玩家"
+                ],
+                "summary": "获取玩家状态信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "此处需要填写 API Key, 可以从用户菜单获取",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求时需要在 Body 携带以下查询参数",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/helper.GetUserStateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时返回",
+                        "schema": {
+                            "$ref": "#/definitions/helper.GetUserStateResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi/helper/rental_server/get_player_list": {
+            "post": {
+                "description": "获取租赁服玩家列表, 例如历史进入列表, 需要提供 API key\n注意: 此 API 会尝试进行游戏登录 (Helper)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "租赁服 (查询类)"
+                ],
+                "summary": "获取租赁服玩家列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "此处需要填写 API Key, 可以从用户菜单获取",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求时需要在 Body 携带以下查询参数",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rental_server.GetPlayerListRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时返回",
+                        "schema": {
+                            "$ref": "#/definitions/rental_server.GetPlayerListResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi/helper/rental_server/search": {
+            "post": {
+                "description": "查询租赁服基础信息, 需要提供 API key\n注意: 此 API 会尝试进行游戏登录 (Helper)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "租赁服 (查询类)"
+                ],
+                "summary": "查询租赁服信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "此处需要填写 API Key, 可以从用户菜单获取",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求时需要在 Body 携带以下查询参数",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rental_server.SearchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时返回",
+                        "schema": {
+                            "$ref": "#/definitions/rental_server.SearchResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi/helper/search_user": {
+            "post": {
+                "description": "查询玩家, 可通过昵称来获取uid, 需要提供 API key\n注意: 此 API 会尝试进行游戏登录 (Helper)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "玩家"
+                ],
+                "summary": "查询玩家",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "此处需要填写 API Key, 可以从用户菜单获取",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求时需要在 Body 携带以下查询参数",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/helper.SearchUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时返回",
+                        "schema": {
+                            "$ref": "#/definitions/helper.SearchUserResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi/owner/rental_server/ban_player": {
+            "post": {
+                "description": "更新租赁服玩家黑名单状态, 游戏账号需要拥有指定的租赁服, 且需要提供 API key\n注意: 此 API 会尝试进行游戏登录 (Owner)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "租赁服 (管理类)"
+                ],
+                "summary": "更新租赁服玩家黑名单状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "此处需要填写 API Key, 可以从用户菜单获取",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求时需要在 Body 携带以下查询参数",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rental_server.BanPlayerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时返回",
+                        "schema": {
+                            "$ref": "#/definitions/giner.BasicResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi/owner/rental_server/create_backup": {
+            "post": {
+                "description": "为自己的服务器创建备份, 需要提供 API Key 且绑定游戏账号\n注意: 此 API 会尝试进行游戏登录 (Owner)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "租赁服 (管理类)"
+                ],
+                "summary": "创建服务器备份",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "此处需要填写 API Key, 可以从用户菜单获取",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求时需要在 Body 携带以下查询参数",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rental_server.CreateBackupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时返回",
+                        "schema": {
+                            "$ref": "#/definitions/giner.BasicResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi/owner/rental_server/kick_player": {
+            "post": {
+                "description": "踢出指定租赁服的指定玩家, 游戏账号需要拥有指定的租赁服, 且需要提供 API key\n注意: 此 API 会尝试进行游戏登录 (Owner)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "租赁服 (管理类)"
+                ],
+                "summary": "踢出租赁服玩家",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "此处需要填写 API Key, 可以从用户菜单获取",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求时需要在 Body 携带以下查询参数",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rental_server.KickPlayerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时返回",
+                        "schema": {
+                            "$ref": "#/definitions/giner.BasicResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi/owner/rental_server/set_level_limitation": {
+            "post": {
+                "description": "设置自己服务器的等级限制, 需要提供 API Key 且绑定游戏账号\n注意: 此 API 会尝试进行游戏登录 (Owner)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "租赁服 (管理类)"
+                ],
+                "summary": "设置服务器等级限制",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "此处需要填写 API Key, 可以从用户菜单获取",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求时需要在 Body 携带以下查询参数",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rental_server.SetLevelLimitationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时返回",
+                        "schema": {
+                            "$ref": "#/definitions/giner.BasicResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi/owner/rental_server/set_password": {
+            "post": {
+                "description": "设置自己服务器的密码, 需要提供 API Key 且绑定游戏账号\n注意: 此 API 会尝试进行游戏登录 (Owner)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "租赁服 (管理类)"
+                ],
+                "summary": "设置服务器密码",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "此处需要填写 API Key, 可以从用户菜单获取",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求时需要在 Body 携带以下查询参数",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rental_server.SetPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时返回",
+                        "schema": {
+                            "$ref": "#/definitions/giner.BasicResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi/owner/rental_server/set_visibility": {
+            "post": {
+                "description": "设置自己服务器的公开性, 需要提供 API Key 且绑定游戏账号\n注意: 此 API 会尝试进行游戏登录 (Owner)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "租赁服 (管理类)"
+                ],
+                "summary": "设置服务器公开性",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "此处需要填写 API Key, 可以从用户菜单获取",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求时需要在 Body 携带以下查询参数",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rental_server.SetVisibilityRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时返回",
+                        "schema": {
+                            "$ref": "#/definitions/giner.BasicResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi/owner/rental_server/turn_off": {
+            "post": {
+                "description": "关闭自己的服务器, 需要提供 API Key 且绑定游戏账号\n注意: 此 API 会尝试进行游戏登录 (Owner)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "租赁服 (管理类)"
+                ],
+                "summary": "关闭服务器",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "此处需要填写 API Key, 可以从用户菜单获取",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求时需要在 Body 携带以下查询参数",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rental_server.TurnOffRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时返回",
+                        "schema": {
+                            "$ref": "#/definitions/giner.BasicResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi/owner/rental_server/turn_on": {
+            "post": {
+                "description": "开启自己的服务器, 需要提供 API Key 且绑定游戏账号\n注意: 此 API 会尝试进行游戏登录 (Owner)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "租赁服 (管理类)"
+                ],
+                "summary": "开启服务器",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "此处需要填写 API Key, 可以从用户菜单获取",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求时需要在 Body 携带以下查询参数",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rental_server.TurnOnRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时返回",
+                        "schema": {
+                            "$ref": "#/definitions/giner.BasicResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi/user/get_status": {
+            "get": {
+                "description": "用户信息查询, 需要提供 API Key",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户中心"
+                ],
+                "summary": "用户信息查询",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "此处需要填写 API Key, 可以从用户菜单获取",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时返回",
+                        "schema": {
+                            "$ref": "#/definitions/user.GetStatusResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi/user/redeem": {
+            "post": {
+                "description": "使用兑换码, 无需进行登录验证",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户中心"
+                ],
+                "summary": "使用兑换码",
+                "parameters": [
+                    {
+                        "description": "请求时需要在 Body 携带以下查询参数",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/bunker-web_routers_openapi_user.RedeemRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时返回",
+                        "schema": {
+                            "$ref": "#/definitions/user.RedeemResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "bunker-web_routers_openapi_user.GetStatusResponseData": {
+            "type": "object",
+            "properties": {
+                "create_at": {
+                    "description": "创建时间",
+                    "type": "integer"
+                },
+                "expire_at": {
+                    "description": "有效期至",
+                    "type": "integer"
+                },
+                "game_id": {
+                    "description": "绑定的游戏ID",
+                    "type": "integer"
+                },
+                "is_admin": {
+                    "description": "是否为系统管理员",
+                    "type": "boolean"
+                },
+                "slots": {
+                    "description": "Slots 列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/bunker-web_routers_openapi_user.Slot"
+                    }
+                },
+                "unlimited_until": {
+                    "description": "无限制权限截止时间",
+                    "type": "integer"
+                },
+                "username": {
+                    "description": "用户名",
+                    "type": "string"
+                }
+            }
+        },
+        "bunker-web_routers_openapi_user.RedeemRequest": {
+            "type": "object",
+            "properties": {
+                "redeem_code": {
+                    "description": "要使用的兑换码",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "用户名",
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "bunker-web_routers_openapi_user.Slot": {
+            "type": "object",
+            "properties": {
+                "expire_at": {
+                    "description": "Slots 有效期至",
+                    "type": "integer"
+                },
+                "game_id": {
+                    "description": "Slots 绑定的游戏ID",
+                    "type": "integer"
+                },
+                "note": {
+                    "description": "Slots 备注",
+                    "type": "string"
+                }
+            }
+        },
+        "g79.RentalServerInfo": {
+            "type": "object",
+            "properties": {
+                "capacity": {
+                    "type": "integer"
+                },
+                "chainInfo": {
+                    "type": "string"
+                },
+                "entity_id": {
+                    "type": "string"
+                },
+                "has_pwd": {
+                    "type": "string"
+                },
+                "icon_index": {
+                    "type": "integer"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "ip_address": {
+                    "type": "string"
+                },
+                "like_num": {
+                    "type": "integer"
+                },
+                "mc_version": {
+                    "type": "string"
+                },
+                "min_level": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "offset": {
+                    "description": "unknown type"
+                },
+                "owner_id": {
+                    "type": "integer"
+                },
+                "player_count": {
+                    "type": "integer"
+                },
+                "pvp": {
+                    "type": "boolean"
+                },
+                "server_name": {
+                    "type": "string"
+                },
+                "server_type": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "visibility": {
+                    "type": "integer"
+                },
+                "world_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "giner.BasicResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "description": "成功或失败原因",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "是否成功",
+                    "type": "boolean"
+                }
+            }
+        },
+        "helper.GetUserDetailsRequest": {
+            "type": "object",
+            "properties": {
+                "uid": {
+                    "description": "目标玩家的启动器UID",
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "helper.GetUserDetailsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "message": {
+                    "description": "成功或失败原因",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "是否成功",
+                    "type": "boolean"
+                }
+            }
+        },
+        "helper.GetUserStateRequest": {
+            "type": "object",
+            "properties": {
+                "uid": {
+                    "description": "目标玩家的启动器UID",
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "helper.GetUserStateResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "message": {
+                    "description": "成功或失败原因",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "是否成功",
+                    "type": "boolean"
+                }
+            }
+        },
+        "helper.SearchUserRequest": {
+            "type": "object",
+            "properties": {
+                "nickname": {
+                    "description": "要查找的玩家昵称",
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "helper.SearchUserResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "message": {
+                    "description": "成功或失败原因",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "是否成功",
+                    "type": "boolean"
+                }
+            }
+        },
+        "rental_server.BanPlayerRequest": {
+            "type": "object",
+            "properties": {
+                "server_id": {
+                    "description": "租赁服实体ID",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "status": {
+                    "description": "是否为黑名单状态 (0, 1)",
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ]
+                },
+                "uid": {
+                    "description": "目标玩家的启动器UID",
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "rental_server.CreateBackupRequest": {
+            "type": "object",
+            "properties": {
+                "backup_name": {
+                    "description": "备份名称",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "backup_slot": {
+                    "description": "要使用的备份槽位, 范围为1-5",
+                    "type": "integer",
+                    "maximum": 5,
+                    "minimum": 1
+                },
+                "server_code": {
+                    "description": "服务器号",
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "rental_server.GetPlayerListRequest": {
+            "type": "object",
+            "properties": {
+                "is_online": {
+                    "description": "是否在线 (false, true, null(不限))",
+                    "type": "boolean"
+                },
+                "length": {
+                    "description": "查询分页长度 (null(不限))",
+                    "type": "integer",
+                    "example": 50
+                },
+                "offset": {
+                    "description": "查询分页偏移",
+                    "type": "integer"
+                },
+                "order_type": {
+                    "description": "排序类型 (0, 1)",
+                    "type": "integer"
+                },
+                "server_id": {
+                    "description": "租赁服实体ID",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "status": {
+                    "description": "玩家状态 (是否黑名单) (0, 1, null(不限))",
+                    "type": "integer"
+                }
+            }
+        },
+        "rental_server.GetPlayerListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "message": {
+                    "description": "成功或失败原因",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "是否成功",
+                    "type": "boolean"
+                }
+            }
+        },
+        "rental_server.KickPlayerRequest": {
+            "type": "object",
+            "properties": {
+                "server_id": {
+                    "description": "租赁服实体ID",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "uid": {
+                    "description": "目标玩家的启动器UID",
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "rental_server.SearchRequest": {
+            "type": "object",
+            "properties": {
+                "server_name": {
+                    "description": "要查找的租赁服号",
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "rental_server.SearchResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/g79.RentalServerInfo"
+                },
+                "message": {
+                    "description": "成功或失败原因",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "是否成功",
+                    "type": "boolean"
+                }
+            }
+        },
+        "rental_server.SetLevelLimitationRequest": {
+            "type": "object",
+            "properties": {
+                "level": {
+                    "description": "要设置的服务器准入等级, 0为关闭, 最高为50(基岩V)",
+                    "type": "integer",
+                    "maximum": 50,
+                    "minimum": 0
+                },
+                "server_code": {
+                    "description": "服务器号",
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "rental_server.SetPasswordRequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "description": "要设置的服务器密码, 内容为空则代表关闭密码",
+                    "type": "string"
+                },
+                "server_code": {
+                    "description": "服务器号",
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "rental_server.SetVisibilityRequest": {
+            "type": "object",
+            "properties": {
+                "server_code": {
+                    "description": "服务器号",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "visibility": {
+                    "description": "要设置的公开性, 0为所有人可见, 1为好友可见, 2为私密",
+                    "type": "integer",
+                    "maximum": 2,
+                    "minimum": 0
+                }
+            }
+        },
+        "rental_server.TurnOffRequest": {
+            "type": "object",
+            "properties": {
+                "server_code": {
+                    "description": "服务器号",
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "rental_server.TurnOnRequest": {
+            "type": "object",
+            "properties": {
+                "server_code": {
+                    "description": "服务器号",
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "user.GetStatusResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/bunker-web_routers_openapi_user.GetStatusResponseData"
+                },
+                "message": {
+                    "description": "成功或失败原因",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "是否成功",
+                    "type": "boolean"
+                }
+            }
+        },
+        "user.RedeemResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/user.RedeemResponseData"
+                },
+                "message": {
+                    "description": "成功或失败原因",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "是否成功",
+                    "type": "boolean"
+                }
+            }
+        },
+        "user.RedeemResponseData": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "description": "兑换结果",
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
