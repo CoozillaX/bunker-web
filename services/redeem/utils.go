@@ -48,14 +48,15 @@ func generateHint(hint string, duration int64) string {
 }
 
 func getRedeemCode(code string) (*models.RedeemCode, *gin.Error) {
-	var redeemCode models.RedeemCode
-	if query := models.DB.Where("code = ?", code).First(&redeemCode); query.Error != nil {
-		return nil, giner.NewPublicGinError("兑换码无效")
-	}
-	if redeemCode.Used {
-		return nil, giner.NewPublicGinError("兑换码已被使用")
-	}
-	return &redeemCode, nil
+	return nil, giner.NewPublicGinError("兑换码功能已被禁用")
+	// var redeemCode models.RedeemCode
+	// if query := models.DB.Where("code = ?", code).First(&redeemCode); query.Error != nil {
+	// 	return nil, giner.NewPublicGinError("兑换码无效")
+	// }
+	// if redeemCode.Used {
+	// 	return nil, giner.NewPublicGinError("兑换码已被使用")
+	// }
+	// return &redeemCode, nil
 }
 
 func getRedeemTime(redeem *models.RedeemCode) (int64, *gin.Error) {
