@@ -29,8 +29,9 @@ func (*User) GetPhoenixToken(c *gin.Context) {
 	// Get fbtoken
 	token, _ := fbtoken.Encrypt(usr.Username, usr.Password, req.HashedIP)
 	// Return as file
-	c.Header("Content-Type", "text/plain")
+	c.Header("Content-Type", "text/plain; charset=utf-8")
 	c.Header("Content-Disposition", "attachment; filename=fbtoken")
+	c.Header("Access-Control-Expose-Headers", "Content-Disposition")
 	c.String(http.StatusOK, token)
 	// Create log
 	c.Set("log", "获取fbtoken")

@@ -47,7 +47,7 @@ func generateHint(hint string, duration int64) string {
 	return fmt.Sprintf(hint, duration/(60*60*24))
 }
 
-func getRedeemCode(code string) (*models.RedeemCode, *gin.Error) {
+func getRedeemCode(_ string) (*models.RedeemCode, *gin.Error) {
 	return nil, giner.NewPublicGinError("兑换码功能已被禁用")
 	// var redeemCode models.RedeemCode
 	// if query := models.DB.Where("code = ?", code).First(&redeemCode); query.Error != nil {

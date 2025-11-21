@@ -30,8 +30,9 @@ func (*RedeemCode) Generate(c *gin.Context) {
 	filename := fmt.Sprintf("redeem_%d_%d_%s.txt", req.CodeType, req.Count, time.Now().Format("2006-01-02_15-04-05"))
 	fileContent := strings.Join(codes, "\n")
 	// Return as file
-	c.Header("Content-Type", "text/plain")
+	c.Header("Content-Type", "text/plain; charset=utf-8")
 	c.Header("Content-Disposition", "attachment; filename="+filename)
+	c.Header("Access-Control-Expose-Headers", "Content-Disposition")
 	c.String(http.StatusOK, fileContent)
 	// Create log
 	c.Set("log", fmt.Sprintf("管理权限生成兑换码成功, 类型: %d, 数量: %d", req.CodeType, req.Count))
