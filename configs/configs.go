@@ -43,10 +43,10 @@ func getEnvBytes(key string, fallback []byte) []byte {
 
 var (
 	// Configuration constants
-	GIN_MODE         = getEnvString("GIN_MODE", gin.DebugMode)
-	GORM_LOGGER_MODE = logger.LogLevel(getEnvInt("GORM_LOGGER_MODE", int(logger.Info)))
-	HTTP_PORT        = getEnvInt("HTTP_PORT", 8080)
-	CURRENT_DOMAIN   = getEnvString("CURRENT_DOMAIN", "localhost")
+	GIN_MODE           = getEnvString("GIN_MODE", gin.DebugMode)
+	GORM_LOGGER_MODE   = logger.LogLevel(getEnvInt("GORM_LOGGER_MODE", int(logger.Info)))
+	HTTP_PORT          = getEnvInt("HTTP_PORT", 8080)
+	CURRENT_WEB_DOMAIN = getEnvString("CURRENT_WEB_DOMAIN", "http://localhost:5173")
 
 	// Database configuration
 	DB_TYPE     = getEnvString("DB_TYPE", "mysql")

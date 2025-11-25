@@ -124,9 +124,6 @@ func RegisterOpenAPI(router *gin.Engine) {
 func RegisterWebAPI(router *gin.Engine) {
 	apiGroup := router.Group("/api")
 	{
-		// Session check
-		apiGroup.Use(middlewares.BearerHandler())
-
 		// Webauthn Login APIs
 		webauthnLoginGroup := apiGroup.Group("/webauthn/login")
 		{
@@ -153,6 +150,8 @@ func RegisterWebAPI(router *gin.Engine) {
 			}
 		}
 
+		// Session check
+		apiGroup.Use(middlewares.BearerHandler())
 		// Login check
 		apiGroup.Use(middlewares.LoginHandler())
 
@@ -350,10 +349,10 @@ func InitRouter() *gin.Engine {
 	}
 
 	router.SetTrustedProxies([]string{
+		"127.0.0.1",
 		"10.0.0.0/8",
 		"172.16.0.0/12",
 		"192.168.0.0/16",
-		"127.0.0.1",
 	})
 
 	// Global middleware

@@ -15,8 +15,17 @@ func BearerHandler() gin.HandlerFunc {
 		// Get session by bearer
 		bearer := c.GetHeader("Authorization")
 		bearer = strings.TrimPrefix(bearer, "Bearer ")
-		_, ok := sessions.GetSessionByBearer(bearer)
-		if !ok {
+		// Get from cookie if not exists
+		if len(bearer) == 0 {
+			cookie, err := c.Cookie(sessions.SESSION_COOKIE_NAME)
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, giner.MakeHTTPResponse(false).SetMessage("请先登录"))
+				return
+			}
+			bearer = cookie
+		}
+		// Check session vaild
+		if _, ok := sessions.GetSessionByBearer(bearer); !ok {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, giner.MakeHTTPResponse(false).SetMessage("会话已失效, 请重新登录"))
 			return
 		}

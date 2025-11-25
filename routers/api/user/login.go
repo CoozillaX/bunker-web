@@ -8,8 +8,10 @@ import (
 	"bunker-web/services/user"
 	"bunker-web/services/user_ban_record"
 	"net/http"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type LoginRequest struct {
@@ -18,9 +20,6 @@ type LoginRequest struct {
 }
 
 func (*User) Login(c *gin.Context) {
-	// Get session
-	bearer, _ := c.Get("bearer")
-	session, _ := sessions.GetSessionByBearer(bearer.(string))
 	// Parse request
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -38,11 +37,26 @@ func (*User) Login(c *gin.Context) {
 		c.Error(giner.NewPublicGinError(banRecord))
 		return
 	}
-	c.JSON(http.StatusOK, giner.MakeHTTPResponse(true).SetMessage("Welcome! "+usr.Username))
-	// Set session
+	// Create bearer
+	bearer := uuid.NewString()
+	// Create session
+	session := sessions.CreateSessionByBearer(bearer)
+	sessions.BindSessionToUsername(bearer, usr.Username)
 	session.Store("isPhoenix", false)
 	session.Store("usr", usr)
-	sessions.BindSessionToUsername(bearer.(string), usr.Username)
+	// Set cookie
+	domain, _ := url.Parse(configs.CURRENT_WEB_DOMAIN)
+	c.SetCookie(
+		sessions.SESSION_COOKIE_NAME,
+		bearer,
+		int(sessions.SESSION_EXPIRE_TIME.Seconds()),
+		"/",
+		domain.Hostname(),
+		domain.Scheme == "https",
+		true,
+	)
+	// Response
+	c.JSON(http.StatusOK, giner.MakeHTTPResponse(true).SetMessage("Welcome! "+usr.Username))
 	// Create log
 	c.Set("log", "用户中心登录成功")
 }

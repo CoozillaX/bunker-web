@@ -9,12 +9,19 @@ import (
 	"encoding/binary"
 	"errors"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
+	"github.com/google/uuid"
 	"github.com/patrickmn/go-cache"
+)
+
+const (
+	WEBAUTHN_REQID_COOKIE_NAME = "BUNKER_WEB_WEBAUTHN_REQID"
+	WEBAUTHN_REQ_EXPIRE_TIME   = time.Minute
 )
 
 var (
@@ -23,24 +30,25 @@ var (
 )
 
 func init() {
+	u, _ := url.Parse(configs.CURRENT_WEB_DOMAIN)
 	webAuthn, _ = webauthn.New(&webauthn.Config{
 		RPDisplayName: "BunkerWeb",
-		RPID:          configs.CURRENT_DOMAIN,
-		RPOrigins:     []string{"https://liliya233.uk"},
+		RPID:          u.Hostname(),
+		RPOrigins:     []string{configs.CURRENT_WEB_DOMAIN},
 		Timeouts: webauthn.TimeoutsConfig{
 			Login: webauthn.TimeoutConfig{
 				Enforce:    true,
-				Timeout:    time.Minute,
-				TimeoutUVD: time.Minute,
+				Timeout:    WEBAUTHN_REQ_EXPIRE_TIME,
+				TimeoutUVD: WEBAUTHN_REQ_EXPIRE_TIME,
 			},
 			Registration: webauthn.TimeoutConfig{
 				Enforce:    true,
-				Timeout:    time.Minute,
-				TimeoutUVD: time.Minute,
+				Timeout:    WEBAUTHN_REQ_EXPIRE_TIME,
+				TimeoutUVD: WEBAUTHN_REQ_EXPIRE_TIME,
 			},
 		},
 	})
-	webAuthnSessionCache = cache.New(time.Minute, time.Second*10)
+	webAuthnSessionCache = cache.New(WEBAUTHN_REQ_EXPIRE_TIME, time.Second*10)
 }
 
 func BeginRegistration(bearer string, user *models.User) (*protocol.CredentialCreation, error) {
@@ -86,21 +94,22 @@ func FinishRegistration(bearer string, user *models.User, response *http.Request
 	return giner.NewPrivateGinError(webauthn_credential.StoreToDB(credential, user.ID))
 }
 
-func BeginDiscoverableLogin(bearer string) (*protocol.CredentialAssertion, error) {
+func BeginDiscoverableLogin() (string, *protocol.CredentialAssertion, error) {
 	// 1. Begin the login process
 	options, session, err := webAuthn.BeginDiscoverableLogin()
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	// 2. Store the session data
-	webAuthnSessionCache.SetDefault(bearer, session)
+	reqId := uuid.NewString()
+	webAuthnSessionCache.SetDefault(reqId, session)
 	// 3. Return options
-	return options, nil
+	return reqId, options, nil
 }
 
-func FinishDiscoverableLogin(bearer string, response *http.Request) (*models.User, *gin.Error) {
+func FinishDiscoverableLogin(reqId string, response *http.Request) (*models.User, *gin.Error) {
 	// 1. Get the session data
-	sess, ok := webAuthnSessionCache.Get(bearer)
+	sess, ok := webAuthnSessionCache.Get(reqId)
 	if !ok {
 		return nil, giner.NewPublicGinError("无效请求")
 	}

@@ -9,6 +9,7 @@ import (
 
 const (
 	SESSION_EXPIRE_TIME = time.Hour * 24 * 7
+	SESSION_COOKIE_NAME = "BUNKER_WEB_SESSION"
 )
 
 var (
@@ -21,8 +22,10 @@ func init() {
 	users = cache.New(SESSION_EXPIRE_TIME, time.Minute*5)
 }
 
-func CreateSessionByBearer(bearer string) {
-	sessions.Add(bearer, &sync.Map{}, SESSION_EXPIRE_TIME)
+func CreateSessionByBearer(bearer string) *sync.Map {
+	session := &sync.Map{}
+	sessions.Add(bearer, session, SESSION_EXPIRE_TIME)
+	return session
 }
 
 func GetSessionByBearer(bearer string) (*sync.Map, bool) {
