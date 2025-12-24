@@ -101,7 +101,8 @@ func CheckIfVaild(u *models.User) (bool, string) {
 	// Check permission
 	switch u.Permission {
 	case PermissionGuest:
-		return false, "账户未激活"
+		// EVENT
+		// return false, "账户未激活"
 	case PermissionNormal:
 		// DISABLED
 		// // Check if unlimited and expire time
