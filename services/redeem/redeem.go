@@ -39,6 +39,10 @@ func UseRedeemCode(usr *models.User, code string) (string, *gin.Error) {
 	var redeemResult string
 	switch redeemCode.CodeType {
 	case RedeemTypeUserOneMonth, RedeemTypeUserThreeMonth:
+		// Check user status
+		if usr.Permission != user.PermissionGuest {
+			return "", giner.NewPublicGinError("您已拥有有效账户，无需兑换此类型兑换码")
+		}
 		// Get time
 		time, ginerr := getRedeemTime(redeemCode)
 		if ginerr != nil {
