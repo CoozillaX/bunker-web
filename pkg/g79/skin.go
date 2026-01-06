@@ -1,10 +1,12 @@
 package g79
 
 import (
+	"bunker-core/protocol/defines"
 	"bunker-core/protocol/g79"
 	"bunker-core/protocol/gameinfo"
 	"bunker-web/pkg/giner"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -61,6 +63,10 @@ func GetCurrentUsingMod(gu *g79.G79User) (*UsingMod, *gin.Error) {
 		if ginerr != nil {
 			return nil, ginerr
 		}
+		query.UsingMod.SkinData.IsSlim, ginerr = GetSkinIsSlim(gu, query.UsingMod.SkinData.ItemID)
+		if ginerr != nil {
+			return nil, ginerr
+		}
 	} else {
 		query.UsingMod.SkinDownloadInfo = &DownloadInfo{
 			EntityID: query.UsingMod.SkinData.ItemID,
@@ -68,6 +74,41 @@ func GetCurrentUsingMod(gu *g79.G79User) (*UsingMod, *gin.Error) {
 		}
 	}
 	return &query.UsingMod, nil
+}
+
+func GetSkinIsSlim(gu *g79.G79User, itemID string) (isSlim bool, err *gin.Error) {
+	// 1. Make request
+	var req struct {
+		ItemIDList []string `json:"item_id_list"`
+	}
+	req.ItemIDList = []string{itemID}
+	reqBody, _ := json.Marshal(req)
+	// 2. Do request
+	reader, protocolError := gu.CreateHttpClient().
+		SetMethod(http.MethodPost).
+		SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + "/pe-item/query/search-by-id-list").
+		SetRawBody([]byte(reqBody)).
+		SetTokenMode(g79.TOKEN_MODE_NORMAL).
+		Do()
+	if protocolError != nil {
+		return false, giner.NewGinErrorFromProtocolErr(protocolError)
+	}
+	// 3. Parse response
+	var query struct {
+		Entities []struct {
+			SkinBodyType int `json:"skin_body_type"`
+		} `json:"entities"`
+	}
+	if err := json.NewDecoder(reader).Decode(&query); err != nil {
+		return false, giner.NewGinErrorFromProtocolErr(&defines.ProtocolError{
+			Message: fmt.Sprintf("GetSkinIsSlim: %v", err),
+		})
+	}
+	// 4. Return result
+	if len(query.Entities) == 1 && query.Entities[0].SkinBodyType == 1 {
+		return true, nil
+	}
+	return false, nil
 }
 
 func (u *UsingMod) GetConfigUUID2OutfitLevel() (ret map[string]*int) {
