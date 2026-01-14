@@ -126,7 +126,7 @@ func QueryByUsername(username string) (*models.User, *gin.Error) {
 
 func QueryByToken(token, currentHashedIP string) (*models.User, *gin.Error) {
 	// 1. Parse token
-	username, saltedPassword, hashedIP, err := fbtoken.Decrypt(token)
+	username, saltedPassword, err := fbtoken.Decrypt(token)
 	if err != nil {
 		return nil, giner.NewPublicGinError("无效的Token")
 	}
@@ -134,10 +134,6 @@ func QueryByToken(token, currentHashedIP string) (*models.User, *gin.Error) {
 	usr, ginerr := NormalLogin(username, saltedPassword)
 	if ginerr != nil {
 		return nil, giner.NewPublicGinError("Token已失效, 请重新获取")
-	}
-	// 3. Check IP
-	if hashedIP != "" && currentHashedIP != hashedIP {
-		return nil, giner.NewPublicGinError("当前IP无法使用此Token")
 	}
 	return usr, nil
 }

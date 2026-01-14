@@ -94,13 +94,9 @@ func (*Phoenix) Login(c *gin.Context) {
 	}
 	// Setup session info
 	session.Store("isPhoenix", true)
-	// Create token if not exist
-	var newToken string
-	if req.FBToken == "" {
-		newToken, _ = fbtoken.Encrypt(usr.Username, usr.Password, "")
-	}
 	// Handle dry Login
 	if req.ServerCode == "::DRY::" && req.ServerPasscode == "::DRY::" {
+		newToken, _ := fbtoken.Encrypt(usr.Username, usr.Password)
 		c.JSON(http.StatusOK, &LoginResponse{
 			BasicResponse: giner.BasicResponse{
 				Success: true,
@@ -155,8 +151,6 @@ func (*Phoenix) Login(c *gin.Context) {
 		ChainInfo:   serverInfo.ChainInfo,
 		IPAddress:   serverInfo.IPAddress,
 		GrowthLevel: lv,
-		Token:       newToken,
-		ResponseTo:  usr.ResponseTo,
 		SkinInfo: &SkinInfo{
 			EntityID: usingMod.SkinDownloadInfo.EntityID,
 			ResUrl:   usingMod.SkinDownloadInfo.ResUrl,

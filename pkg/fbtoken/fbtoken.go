@@ -8,11 +8,10 @@ import (
 	"fmt"
 )
 
-func Encrypt(username, password, hashedIP string) (fbtoken string, err error) {
+func Encrypt(username, password string) (fbtoken string, err error) {
 	jsonBytes, _ := json.Marshal(map[string]string{
-		"username":  username,
-		"password":  password,
-		"hashed_ip": hashedIP,
+		"username": username,
+		"password": password,
 	})
 	fbtokenBytes, err := utils.AES_256_CFBEncrypt(configs.FBTOKEN_KEY, jsonBytes, configs.FBTOKEN_IV)
 	if err != nil {
@@ -21,25 +20,24 @@ func Encrypt(username, password, hashedIP string) (fbtoken string, err error) {
 	return base64.StdEncoding.EncodeToString(fbtokenBytes), nil
 }
 
-func Decrypt(fbtoken string) (username, password, hashedIP string, err error) {
+func Decrypt(fbtoken string) (username, password string, err error) {
 	fbtokenBytes, err := base64.StdEncoding.DecodeString(fbtoken)
 	if err != nil {
-		return "", "", "", err
+		return "", "", err
 	}
 	jsonBytes, err := utils.AES_256_CFBDecrypt(configs.FBTOKEN_KEY, fbtokenBytes, configs.FBTOKEN_IV)
 	if err != nil {
-		return "", "", "", err
+		return "", "", err
 	}
 	var result struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
-		HashedIP string `json:"hashed_ip"`
 	}
 	if err := json.Unmarshal(jsonBytes, &result); err != nil {
-		return "", "", "", err
+		return "", "", err
 	}
 	if result.Username == "" || result.Password == "" {
-		return "", "", "", fmt.Errorf("invaild token")
+		return "", "", fmt.Errorf("invaild token")
 	}
-	return result.Username, result.Password, result.HashedIP, nil
+	return result.Username, result.Password, nil
 }

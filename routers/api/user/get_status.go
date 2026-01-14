@@ -96,7 +96,6 @@ func (*User) GetStatus(c *gin.Context) {
 			ExpireAt:       ExpireAt,
 			APIKey:         usr.APIKey,
 			HasEmail:       usr.Email != "",
-			ClientUsername: usr.ResponseTo,
 			Slots:          Slots,
 			Credentials:    credentialInfos,
 		},

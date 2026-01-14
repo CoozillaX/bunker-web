@@ -26,7 +26,6 @@ type User struct {
 	SMSCodeTimes       int
 	LastGetSMSCodeAt   sql.NullTime
 	APIKey             string
-	ResponseTo         string   // PhoenixBuilder specific field
 	HelperMpayUser     MpayUser `gorm:"-"`
 	OwnerMpayUser      MpayUser `gorm:"-"`
 }

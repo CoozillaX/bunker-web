@@ -198,8 +198,6 @@ func RegisterWebAPI(router *gin.Engine) {
 			userGroup.GET("/logout", routers.API.User.Logout)
 			// Remove account
 			userGroup.POST("/remove_account", routers.API.User.RemoveAccount)
-			// Set response to
-			userGroup.POST("/set_response_to", routers.API.User.SetResponseTo)
 			// Use redeem code
 			userGroup.POST("/redeem", routers.API.User.Redeem)
 			// API key group
@@ -225,7 +223,7 @@ func RegisterWebAPI(router *gin.Engine) {
 				userGroup.POST("/bind_game_id", routers.API.User.BindGameId)
 
 				// Get fbtoken file
-				userGroup.POST("/get_phoenix_token", routers.API.User.GetPhoenixToken)
+				userGroup.GET("/get_phoenix_token", routers.API.User.GetPhoenixToken)
 			}
 		}
 
