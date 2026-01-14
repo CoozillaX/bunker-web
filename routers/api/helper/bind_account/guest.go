@@ -4,7 +4,6 @@ import (
 	"bunker-web/models"
 	"bunker-web/pkg/giner"
 	"bunker-web/pkg/sessions"
-	"bunker-web/services/user"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,19 +20,17 @@ func (*BindAccount) Guest(c *gin.Context) {
 	u, _ := session.Load("usr")
 	usr := u.(*models.User)
 	// Check helper
-	if usr.HelperMpayUser != nil && usr.HelperMpayUser.MpayToken != "" {
+	if usr.HelperMpayUser != nil && usr.HelperMpayUser.GetToken() != "" {
 		c.Error(giner.NewPublicGinError("创建失败, 已存在辅助用户账号"))
 		return
 	}
-	// Store to DB
-	defer models.DBSave(usr.HelperMpayUser)
-	// Try to login
-	helper, ginerr := user.GetLoginHelperForHelper(usr)
-	if ginerr != nil {
-		c.Error(ginerr)
-		return
+	// Create helper user if not exist
+	if usr.HelperMpayUser == nil {
+		usr.HelperMpayUser = &models.AndroidMpayUser{}
 	}
-	if protocolErr := helper.GuestLogin(); protocolErr != nil {
+	defer models.DBSave(usr)
+	// Try to login
+	if protocolErr := usr.HelperMpayUser.GuestLogin(); protocolErr != nil {
 		c.JSON(http.StatusOK, giner.MakeHTTPResponse(false).
 			SetMessage(protocolErr.Message).
 			SetData(

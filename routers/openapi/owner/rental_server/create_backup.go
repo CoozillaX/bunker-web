@@ -38,12 +38,12 @@ func (*RentalServer) CreateBackup(c *gin.Context) {
 	u, _ := c.Get("usr")
 	usr := u.(*models.User)
 	// Check owner if exists
-	if usr.OwnerMpayUser == nil || usr.OwnerMpayUser.MpayToken == "" {
+	if usr.OwnerMpayUser == nil || usr.OwnerMpayUser.GetToken() == "" {
 		c.Error(giner.NewPublicGinError("请先绑定游戏账号"))
 		return
 	}
 	// Get g79 user
-	gu, ginerr := g79.HandleG79Login(usr.OwnerMpayUser.MpayUser, nil)
+	gu, ginerr := g79.HandleG79Login(usr.OwnerMpayUser)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

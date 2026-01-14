@@ -28,14 +28,14 @@ func (*Helper) ChangeName(c *gin.Context) {
 		return
 	}
 	// Check helper if exist
-	if usr.HelperMpayUser == nil || usr.HelperMpayUser.MpayToken == "" {
+	if usr.HelperMpayUser == nil || usr.HelperMpayUser.GetToken() == "" {
 		c.Error(giner.NewPublicGinError("未创建辅助用户"))
 		return
 	}
 	// Store to DB
 	defer models.DBSave(usr.HelperMpayUser)
 	// Get g79 user
-	gu, ginerr := g79.HandleG79Login(usr.HelperMpayUser.MpayUser, nil)
+	gu, ginerr := g79.HandleG79Login(usr.HelperMpayUser)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

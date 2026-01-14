@@ -24,7 +24,8 @@ func init() {
 	DB.AutoMigrate(
 		&Announcement{},
 		&Log{},
-		&MpayUser{},
+		&AndroidMpayUser{},
+		&WindowsMpayUser{},
 		&RedeemCode{},
 		&Slot{},
 		&UnlimitedRentalServer{},
@@ -44,7 +45,7 @@ func connect() {
 
 	maxRetries := 5
 
-	for i := 0; i < maxRetries; i++ {
+	for i := range maxRetries {
 		db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 			Logger: logger.Default.LogMode(configs.GORM_LOGGER_MODE),
 		})

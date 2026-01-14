@@ -47,6 +47,12 @@ func (*Phoenix) TransferCheckNum(c *gin.Context) {
 		c.Error(giner.NewPublicGinError("会话已失效, 请重新登录"))
 		return
 	}
+	// Get platform
+	platform, ok := session.Load("platform")
+	if !ok {
+		c.Error(giner.NewPublicGinError("会话已失效, 请重新登录"))
+		return
+	}
 	// Parse fb req
 	var dataList []any
 	if err := json.Unmarshal([]byte(req.Data), &dataList); err != nil {
@@ -64,6 +70,7 @@ func (*Phoenix) TransferCheckNum(c *gin.Context) {
 		dataList[0].(string),
 		dataList[1].(string),
 		strconv.Itoa(int(dataList[2].(float64))),
+		platform.(string),
 	)
 	if err != nil {
 		c.Error(giner.NewPrivateGinError(err))

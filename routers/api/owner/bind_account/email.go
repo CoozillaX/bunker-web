@@ -4,7 +4,6 @@ import (
 	"bunker-web/models"
 	"bunker-web/pkg/giner"
 	"bunker-web/pkg/sessions"
-	"bunker-web/services/user"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -33,19 +32,17 @@ func (*BindAccount) Email(c *gin.Context) {
 		return
 	}
 	// Check owner
-	if usr.OwnerMpayUser != nil && usr.OwnerMpayUser.MpayToken != "" {
+	if usr.OwnerMpayUser != nil && usr.OwnerMpayUser.GetToken() != "" {
 		c.Error(giner.NewPublicGinError("绑定失败, 已绑定游戏账号"))
 		return
 	}
-	// Store to DB
-	defer models.DBSave(usr.OwnerMpayUser)
-	// Try to login
-	helper, ginerr := user.GetLoginHelperForOwner(usr)
-	if ginerr != nil {
-		c.Error(ginerr)
-		return
+	// Create helper user if not exist
+	if usr.OwnerMpayUser == nil {
+		usr.OwnerMpayUser = &models.AndroidMpayUser{}
 	}
-	if protocolErr := helper.PasswordLogin(req.UserName, req.Password, req.PasswordLevel); protocolErr != nil {
+	defer models.DBSave(usr)
+	// Try to login
+	if protocolErr := usr.OwnerMpayUser.PasswordLogin(req.UserName, req.Password, req.PasswordLevel); protocolErr != nil {
 		c.JSON(http.StatusOK, giner.MakeHTTPResponse(false).
 			SetMessage(protocolErr.Message).
 			SetData(

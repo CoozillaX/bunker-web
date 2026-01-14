@@ -46,12 +46,12 @@ func (*RentalServer) GetPlayerList(c *gin.Context) {
 	u, _ := c.Get("usr")
 	usr := u.(*models.User)
 	// Check helper if exist
-	if usr.HelperMpayUser == nil || usr.HelperMpayUser.MpayToken == "" {
+	if usr.HelperMpayUser == nil || usr.HelperMpayUser.GetToken() == "" {
 		c.Error(giner.NewPublicGinError("未创建辅助用户"))
 		return
 	}
 	// g79 login
-	gu, ginerr := g79.HandleG79Login(usr.HelperMpayUser.MpayUser, nil)
+	gu, ginerr := g79.HandleG79Login(usr.HelperMpayUser)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

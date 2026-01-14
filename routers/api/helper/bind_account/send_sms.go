@@ -42,7 +42,7 @@ func (*BindAccount) SendSMS(c *gin.Context) {
 		return
 	}
 	// Check helper
-	if usr.HelperMpayUser != nil && usr.HelperMpayUser.MpayToken != "" {
+	if usr.HelperMpayUser != nil && usr.HelperMpayUser.GetToken() != "" {
 		c.Error(giner.NewPublicGinError("创建失败, 已存在辅助用户账号"))
 		return
 	}
@@ -55,15 +55,13 @@ func (*BindAccount) SendSMS(c *gin.Context) {
 		c.Error(giner.NewPublicGinError("今日获取验证码次数已达上限"))
 		return
 	}
-	// Store to DB
-	defer models.DBSave(usr.HelperMpayUser)
-	// Try to login
-	helper, ginerr := user.GetLoginHelperForHelper(usr)
-	if ginerr != nil {
-		c.Error(ginerr)
-		return
+	// Create helper user if not exist
+	if usr.HelperMpayUser == nil {
+		usr.HelperMpayUser = &models.AndroidMpayUser{}
 	}
-	if protocolErr := helper.GetSMSLoginCode(req.Mobile); protocolErr != nil {
+	defer models.DBSave(usr)
+	// Try to request code
+	if protocolErr := usr.HelperMpayUser.SMSLoginRequestCode(req.Mobile); protocolErr != nil {
 		c.JSON(http.StatusOK, giner.MakeHTTPResponse(false).SetData(
 			&SendSMSResponseData{
 				VerifyUrl: protocolErr.VerifyUrl,

@@ -26,7 +26,7 @@ func (*Helper) GetStatus(c *gin.Context) {
 	u, _ := session.Load("usr")
 	usr := u.(*models.User)
 	// Check helper if exist
-	if usr.HelperMpayUser == nil || usr.HelperMpayUser.MpayToken == "" {
+	if usr.HelperMpayUser == nil || usr.HelperMpayUser.GetToken() == "" {
 		c.JSON(http.StatusOK, giner.MakeHTTPResponse(false).
 			SetMessage("未创建辅助用户").
 			SetData(&GetStatusResponseData{
@@ -40,7 +40,7 @@ func (*Helper) GetStatus(c *gin.Context) {
 	// We don't need to login again if x19 user exists in session
 	defer models.DBSave(usr.HelperMpayUser)
 	// Relogin
-	gu, ginerr := g79.HandleG79Login(usr.HelperMpayUser.MpayUser, nil)
+	gu, ginerr := g79.HandleG79Login(usr.HelperMpayUser)
 	if ginerr != nil {
 		respData := &GetStatusResponseData{
 			Set: true,

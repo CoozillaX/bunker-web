@@ -17,7 +17,7 @@ func (*Helper) UnBind(c *gin.Context) {
 	u, _ := session.Load("usr")
 	usr := u.(*models.User)
 	// Check helper if exist
-	if usr.HelperMpayUser == nil || usr.HelperMpayUser.MpayToken == "" {
+	if usr.HelperMpayUser == nil || usr.HelperMpayUser.GetToken() == "" {
 		c.Error(giner.NewPublicGinError("解绑失败, 不存在辅助用户"))
 		return
 	}

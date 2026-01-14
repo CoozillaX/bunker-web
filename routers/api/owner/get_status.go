@@ -25,7 +25,7 @@ func (*Owner) GetStatus(c *gin.Context) {
 	u, _ := session.Load("usr")
 	usr := u.(*models.User)
 	// Check owner if exist
-	if usr.OwnerMpayUser == nil || usr.OwnerMpayUser.MpayToken == "" {
+	if usr.OwnerMpayUser == nil || usr.OwnerMpayUser.GetToken() == "" {
 		c.JSON(http.StatusOK, giner.MakeHTTPResponse(false).
 			SetMessage("未绑定游戏账号").
 			SetData(&GetStatusResponseData{
@@ -39,7 +39,7 @@ func (*Owner) GetStatus(c *gin.Context) {
 	// We don't need to login again if x19 user exists in session
 	defer models.DBSave(usr.OwnerMpayUser)
 	// Relogin
-	gu, ginerr := g79.HandleG79Login(usr.OwnerMpayUser.MpayUser, nil)
+	gu, ginerr := g79.HandleG79Login(usr.OwnerMpayUser)
 	if ginerr != nil {
 		c.JSON(http.StatusOK, giner.MakeHTTPResponse(false).
 			SetMessage(giner.GetPublicErrorString(ginerr)).

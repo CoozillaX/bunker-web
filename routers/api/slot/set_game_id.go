@@ -46,13 +46,13 @@ func (*Slot) SetGameID(c *gin.Context) {
 		return
 	}
 	// Check helper if exist
-	if usr.HelperMpayUser == nil || usr.HelperMpayUser.MpayToken == "" {
+	if usr.HelperMpayUser == nil || usr.HelperMpayUser.GetToken() == "" {
 		c.JSON(http.StatusOK, giner.MakeHTTPResponse(false).SetMessage("未创建辅助用户"))
 		c.Set("log", "未创建Helper")
 		return
 	}
 	// g79 login
-	gu, ginerr := g79.HandleG79Login(usr.HelperMpayUser.MpayUser, nil)
+	gu, ginerr := g79.HandleG79Login(usr.HelperMpayUser)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

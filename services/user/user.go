@@ -116,8 +116,6 @@ func CheckIfVaild(u *models.User) (bool, string) {
 func QueryByUsername(username string) (*models.User, *gin.Error) {
 	var user models.User
 	err := models.DB.
-		Preload("HelperMpayUser").
-		Preload("OwnerMpayUser").
 		Where("username = ?", username).
 		First(&user).Error
 	if err != nil {
@@ -147,8 +145,6 @@ func QueryByToken(token, currentHashedIP string) (*models.User, *gin.Error) {
 func QueryUserByAPIKey(key string) (*models.User, *gin.Error) {
 	var user models.User
 	err := models.DB.
-		Preload("HelperMpayUser").
-		Preload("OwnerMpayUser").
 		Where("api_key = ?", key).
 		First(&user).Error
 	if err != nil {
@@ -160,8 +156,6 @@ func QueryUserByAPIKey(key string) (*models.User, *gin.Error) {
 func QueryUserByEmail(email string) (*models.User, *gin.Error) {
 	var user models.User
 	err := models.DB.
-		Preload("HelperMpayUser").
-		Preload("OwnerMpayUser").
 		Where("email = ?", email).
 		First(&user).Error
 	if err != nil {
@@ -173,8 +167,6 @@ func QueryUserByEmail(email string) (*models.User, *gin.Error) {
 func QueryUserByID(id uint) (*models.User, *gin.Error) {
 	var user models.User
 	err := models.DB.
-		Preload("HelperMpayUser").
-		Preload("OwnerMpayUser").
 		Where("id = ?", id).
 		First(&user).Error
 	if err != nil {
@@ -241,4 +233,30 @@ func GameLicenseCheck(u *models.User, serverCode string, ownerID int) *gin.Error
 		)
 	}
 	return nil
+}
+
+func DeleteHelper(u *models.User) *gin.Error {
+	if u.HelperMpayUser == nil {
+		return nil
+	}
+	// Remove helper
+	if err := models.DBRemove(u.HelperMpayUser); err != nil {
+		return giner.NewPrivateGinError(err)
+	}
+	// Reset helper info
+	u.HelperMpayUser = nil
+	return giner.NewPrivateGinError(models.DBSave(u))
+}
+
+func DeleteOwner(u *models.User) *gin.Error {
+	if u.OwnerMpayUser == nil {
+		return nil
+	}
+	// Remove helper
+	if err := models.DBRemove(u.OwnerMpayUser); err != nil {
+		return giner.NewPrivateGinError(err)
+	}
+	// Reset helper info
+	u.OwnerMpayUser = nil
+	return giner.NewPrivateGinError(models.DBSave(u))
 }

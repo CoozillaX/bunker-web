@@ -1,15 +1,15 @@
 package phoenix
 
 import (
-	"bunker-core/protocol/defines"
 	"bunker-core/protocol/g79"
-	"bunker-core/protocol/gameinfo"
+	"bunker-web/models"
 	"bunker-web/pkg/fbtoken"
 	"bunker-web/pkg/giner"
 	"bunker-web/pkg/sessions"
 	"bunker-web/services/user"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -40,19 +40,20 @@ type LoginResponse struct {
 	ServerMsg   string          `json:"server_msg,omitempty"`
 }
 
-var versionCache = cache.New(24*time.Hour, time.Hour) // cache[serverCode]serverVersion
+var versionCache = cache.New(24*time.Hour, time.Hour) // cache[serverCode]bedrockVersion
 
 func requestServerInfo(
-	mu *defines.MpayUser,
+	mu models.MpayUser,
 	req *LoginRequest,
 ) (*g79.G79User, *g79.RentalServerInfo, *gin.Error) {
 	// change engine version by cache
-	engineVersion := gameinfo.DefaultEngineVersion
 	if value, ok := versionCache.Get(req.ServerCode); ok {
-		engineVersion = value.(string)
+		if err := mu.UpdateGameInfoByBedrockVersion(value.(string)); err != nil {
+			return nil, nil, giner.NewPrivateGinError(err)
+		}
 	}
 	// g79 login
-	gu, ginerr := g79_utils.HandleG79Login(mu, &engineVersion)
+	gu, ginerr := g79_utils.HandleG79Login(mu)
 	if ginerr != nil {
 		return nil, nil, ginerr
 	}
@@ -62,13 +63,10 @@ func requestServerInfo(
 		return nil, nil, giner.NewGinErrorFromProtocolErr(protocolErr)
 	}
 	// cache version
-	currentGameInfo, err := gameinfo.GetInfoByGameVersion(rentalInfo.MCVersion)
-	if err != nil {
-		return nil, nil, giner.NewPrivateGinError(err)
-	}
-	versionCache.SetDefault(req.ServerCode, currentGameInfo.EngineVersion)
+	rentalBedrockVersion := strings.TrimSuffix(rentalInfo.MCVersion, "-release")
+	versionCache.SetDefault(req.ServerCode, rentalBedrockVersion)
 	// check version
-	if gu.GameInfo.EngineVersion != currentGameInfo.EngineVersion {
+	if gu.GetBedrockVersion() != rentalBedrockVersion {
 		// re-login and get chain with updated engine version
 		return requestServerInfo(mu, req)
 	}
@@ -116,7 +114,7 @@ func (*Phoenix) Login(c *gin.Context) {
 		return
 	}
 	// Auto create helper if not exist
-	if usr.HelperMpayUser == nil || usr.HelperMpayUser.MpayToken == "" {
+	if usr.HelperMpayUser == nil || usr.HelperMpayUser.GetToken() == "" {
 		c.Error(giner.NewPublicGinError("辅助用户不存在, 请先创建辅助用户"))
 		return
 	}
@@ -126,7 +124,7 @@ func (*Phoenix) Login(c *gin.Context) {
 		return
 	}
 	// Query server info
-	gu, serverInfo, ginerr := requestServerInfo(usr.HelperMpayUser.MpayUser, &req)
+	gu, serverInfo, ginerr := requestServerInfo(usr.HelperMpayUser, &req)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return
@@ -167,8 +165,9 @@ func (*Phoenix) Login(c *gin.Context) {
 		OutfitInfo: usingMod.GetConfigUUID2OutfitLevel(),
 	})
 	session.Store("entityID", gu.EntityID)
-	session.Store("engineVersion", gu.GameInfo.EngineVersion)
-	session.Store("patchVersion", gu.GameInfo.PatchVersion)
+	session.Store("engineVersion", gu.GetEngineVersion())
+	session.Store("patchVersion", gu.GetPatchVersion())
+	session.Store("platform", gu.GetSystemName())
 	// Create log
 	c.Set("log", fmt.Sprintf(
 		"Phoenix登录成功(Normal), Helper: %s, Code: %s, Version: %s",

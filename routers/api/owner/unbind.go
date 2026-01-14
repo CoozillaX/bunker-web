@@ -18,7 +18,7 @@ func (*Owner) UnBind(c *gin.Context) {
 	u, _ := session.Load("usr")
 	usr := u.(*models.User)
 	// Check owner if exist
-	if usr.OwnerMpayUser == nil || usr.OwnerMpayUser.MpayToken == "" {
+	if usr.OwnerMpayUser == nil || usr.OwnerMpayUser.GetToken() == "" {
 		c.Error(giner.NewPublicGinError("解绑失败, 未绑定游戏账号"))
 		return
 	}
