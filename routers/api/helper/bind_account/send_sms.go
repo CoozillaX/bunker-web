@@ -42,9 +42,14 @@ func (*BindAccount) SendSMS(c *gin.Context) {
 		return
 	}
 	// Check helper
-	if usr.HelperMpayUser != nil && usr.HelperMpayUser.GetToken() != "" {
-		c.Error(giner.NewPublicGinError("创建失败, 已存在辅助用户账号"))
-		return
+	if usr.HelperMpayUser != nil {
+		if usr.HelperMpayUser.GetToken() != "" {
+			c.Error(giner.NewPublicGinError("创建失败, 已存在辅助用户账号"))
+			return
+		}
+		if usr.HelperMpayUser.GetType() != models.MpayUserTypeAndroid {
+			user.DeleteHelper(usr)
+		}
 	}
 	// Check if has enough chances
 	defer models.DBSave(usr)
@@ -59,7 +64,6 @@ func (*BindAccount) SendSMS(c *gin.Context) {
 	if usr.HelperMpayUser == nil {
 		usr.HelperMpayUser = &models.AndroidMpayUser{}
 	}
-	defer models.DBSave(usr)
 	// Try to request code
 	if protocolErr := usr.HelperMpayUser.SMSLoginRequestCode(req.Mobile); protocolErr != nil {
 		c.JSON(http.StatusOK, giner.MakeHTTPResponse(false).SetData(

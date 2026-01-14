@@ -261,10 +261,14 @@ func RegisterWebAPI(router *gin.Engine) {
 					bindAccountGroup.POST("/email", routers.API.Helper.Email)
 					// Create a helper by guest login
 					bindAccountGroup.GET("/guest", routers.API.Helper.Guest)
-					// Use mobile account to create helper
-					bindAccountGroup.POST("/mobile", routers.API.Helper.Mobile)
 					// Send smscode
 					bindAccountGroup.POST("/send_sms", routers.API.Helper.SendSMS)
+					// Use mobile account to create helper
+					bindAccountGroup.POST("/mobile", routers.API.Helper.Mobile)
+					// Get QR code login info
+					bindAccountGroup.GET("/get_qrcode", routers.API.Helper.GetQRCode)
+					// Use QR code to create helper
+					bindAccountGroup.POST("/qrcode", routers.API.Helper.QRCode)
 				}
 			}
 		}
@@ -288,10 +292,14 @@ func RegisterWebAPI(router *gin.Engine) {
 				{
 					// Use email account to create helper
 					bindAccountGroup.POST("/email", routers.API.Owner.Email)
-					// Use mobile account to create helper
-					bindAccountGroup.POST("/mobile", routers.API.Owner.Mobile)
 					// Send smscode
 					bindAccountGroup.POST("/send_sms", routers.API.Owner.SendSMS)
+					// Use mobile account to create helper
+					bindAccountGroup.POST("/mobile", routers.API.Owner.Mobile)
+					// Get QR code login info
+					bindAccountGroup.GET("/get_qrcode", routers.API.Owner.GetQRCode)
+					// Use QR code to create helper
+					bindAccountGroup.POST("/qrcode", routers.API.Owner.QRCode)
 				}
 			}
 		}

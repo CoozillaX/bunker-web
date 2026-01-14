@@ -42,9 +42,14 @@ func (*BindAccount) SendSMS(c *gin.Context) {
 		return
 	}
 	// Check owner
-	if usr.OwnerMpayUser != nil && usr.OwnerMpayUser.GetToken() != "" {
-		c.Error(giner.NewPublicGinError("绑定失败, 已绑定游戏账号"))
-		return
+	if usr.OwnerMpayUser != nil {
+		if usr.OwnerMpayUser.GetToken() != "" {
+			c.Error(giner.NewPublicGinError("创建失败, 已存在辅助用户账号"))
+			return
+		}
+		if usr.OwnerMpayUser.GetType() != models.MpayUserTypeAndroid {
+			user.DeleteOwner(usr)
+		}
 	}
 	// Check if has enough chances
 	defer models.DBSave(usr)
@@ -55,11 +60,10 @@ func (*BindAccount) SendSMS(c *gin.Context) {
 		c.Error(giner.NewPublicGinError("今日获取验证码次数已达上限"))
 		return
 	}
-	// Create helper user if not exist
+	// Create owner user if not exist
 	if usr.OwnerMpayUser == nil {
 		usr.OwnerMpayUser = &models.AndroidMpayUser{}
 	}
-	defer models.DBSave(usr)
 	// Try to request code
 	if protocolErr := usr.OwnerMpayUser.SMSLoginRequestCode(req.Mobile); protocolErr != nil {
 		c.JSON(http.StatusOK, giner.MakeHTTPResponse(false).SetData(

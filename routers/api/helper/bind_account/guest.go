@@ -4,6 +4,7 @@ import (
 	"bunker-web/models"
 	"bunker-web/pkg/giner"
 	"bunker-web/pkg/sessions"
+	"bunker-web/services/user"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,9 +21,14 @@ func (*BindAccount) Guest(c *gin.Context) {
 	u, _ := session.Load("usr")
 	usr := u.(*models.User)
 	// Check helper
-	if usr.HelperMpayUser != nil && usr.HelperMpayUser.GetToken() != "" {
-		c.Error(giner.NewPublicGinError("创建失败, 已存在辅助用户账号"))
-		return
+	if usr.HelperMpayUser != nil {
+		if usr.HelperMpayUser.GetToken() != "" {
+			c.Error(giner.NewPublicGinError("无法获取二维码, 已存在辅助用户账号"))
+			return
+		}
+		if usr.HelperMpayUser.GetType() != models.MpayUserTypeAndroid {
+			user.DeleteHelper(usr)
+		}
 	}
 	// Create helper user if not exist
 	if usr.HelperMpayUser == nil {

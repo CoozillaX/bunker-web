@@ -34,13 +34,19 @@ func (*BindAccount) Mobile(c *gin.Context) {
 	if usr.OwnerMpayUser == nil {
 		c.Error(giner.NewPublicGinError("请先获取手机验证码"))
 		return
-	} else if usr.OwnerMpayUser.GetToken() != "" {
+	}
+	if usr.OwnerMpayUser.GetToken() != "" {
 		c.Error(giner.NewPublicGinError("绑定失败, 已绑定游戏账号"))
 		return
 	}
 	// Create helper user if not exist
-	if usr.OwnerMpayUser == nil {
-		usr.OwnerMpayUser = &models.AndroidMpayUser{}
+	if usr.OwnerMpayUser == nil || usr.OwnerMpayUser.GetType() != models.MpayUserTypeAndroid {
+		c.Error(giner.NewPublicGinError("请先获取手机验证码"))
+		return
+	}
+	if usr.OwnerMpayUser.GetToken() != "" {
+		c.Error(giner.NewPublicGinError("绑定失败, 已存在辅助用户账号"))
+		return
 	}
 	defer models.DBSave(usr)
 	// Try to login

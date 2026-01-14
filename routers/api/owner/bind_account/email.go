@@ -4,6 +4,7 @@ import (
 	"bunker-web/models"
 	"bunker-web/pkg/giner"
 	"bunker-web/pkg/sessions"
+	"bunker-web/services/user"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -32,9 +33,14 @@ func (*BindAccount) Email(c *gin.Context) {
 		return
 	}
 	// Check owner
-	if usr.OwnerMpayUser != nil && usr.OwnerMpayUser.GetToken() != "" {
-		c.Error(giner.NewPublicGinError("绑定失败, 已绑定游戏账号"))
-		return
+	if usr.OwnerMpayUser != nil {
+		if usr.OwnerMpayUser.GetToken() != "" {
+			c.Error(giner.NewPublicGinError("创建失败, 已存在辅助用户账号"))
+			return
+		}
+		if usr.OwnerMpayUser.GetType() != models.MpayUserTypeAndroid {
+			user.DeleteOwner(usr)
+		}
 	}
 	// Create helper user if not exist
 	if usr.OwnerMpayUser == nil {
