@@ -26,8 +26,6 @@ func init() {
 		&Log{},
 		&AndroidMpayUser{},
 		&WindowsMpayUser{},
-		&RedeemCode{},
-		&Slot{},
 		&UnlimitedRentalServer{},
 		&UserBanRecord{},
 		&User{},

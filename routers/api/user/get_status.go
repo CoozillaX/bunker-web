@@ -4,7 +4,6 @@ import (
 	"bunker-web/models"
 	"bunker-web/pkg/giner"
 	"bunker-web/pkg/sessions"
-	"bunker-web/services/slot"
 	"bunker-web/services/user"
 	"bunker-web/services/webauthn_credential"
 	"net/http"
@@ -28,15 +27,12 @@ type CredentialInfo struct {
 type GetStatusResponseData struct {
 	Username       string            `json:"username"`
 	GameID         int               `json:"game_id"`
-	UnlimitedUntil int64             `json:"unlimited_until"`
 	Permission     uint              `json:"permission"`
 	IsAdmin        bool              `json:"is_admin"`
 	CreateAt       int64             `json:"create_at"`
-	ExpireAt       int64             `json:"expire_at"`
 	APIKey         string            `json:"api_key"`
 	HasEmail       bool              `json:"has_email"`
 	ClientUsername string            `json:"client_username"`
-	Slots          []*Slot           `json:"slots"`
 	Credentials    []*CredentialInfo `json:"credentials"`
 }
 
@@ -53,24 +49,6 @@ func (*User) GetStatus(c *gin.Context) {
 		return
 	}
 	session.Store("usr", usr)
-	// Query user unlimited time
-	var unlimitedUntil int64
-	if usr.UnlimitedUntil.Valid {
-		unlimitedUntil = usr.UnlimitedUntil.Time.UnixMilli()
-	}
-	var ExpireAt int64
-	if usr.ExpireAt.Valid {
-		ExpireAt = usr.ExpireAt.Time.UnixMilli()
-	}
-	var Slots []*Slot
-	for _, s := range slot.QuerySlotListByUserID(usr.ID) {
-		Slots = append(Slots, &Slot{
-			ID:       s.ID,
-			GameID:   s.GameID,
-			ExpireAt: s.ExpireAt.Time.UnixMilli(),
-			Note:     s.Note,
-		})
-	}
 	// Query Credentials
 	credentials, err := webauthn_credential.QueryModelsByUserID(usr.ID)
 	if err != nil {
@@ -87,17 +65,14 @@ func (*User) GetStatus(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, giner.MakeHTTPResponse(true).SetData(
 		&GetStatusResponseData{
-			Username:       usr.Username,
-			GameID:         usr.GameID,
-			UnlimitedUntil: unlimitedUntil,
-			Permission:     usr.Permission,
-			IsAdmin:        usr.Permission == user.PermissionAdmin,
-			CreateAt:       usr.CreatedAt.UnixMilli(),
-			ExpireAt:       ExpireAt,
-			APIKey:         usr.APIKey,
-			HasEmail:       usr.Email != "",
-			Slots:          Slots,
-			Credentials:    credentialInfos,
+			Username:    usr.Username,
+			GameID:      usr.GameID,
+			Permission:  usr.Permission,
+			IsAdmin:     usr.Permission == user.PermissionAdmin,
+			CreateAt:    usr.CreatedAt.UnixMilli(),
+			APIKey:      usr.APIKey,
+			HasEmail:    usr.Email != "",
+			Credentials: credentialInfos,
 		},
 	))
 	// Create log

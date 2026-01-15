@@ -15,14 +15,12 @@ type QueryRequest struct {
 }
 
 type QueryResponseData struct {
-	UserName       string `json:"username"`
-	GameID         int    `json:"game_id"`
-	Permission     uint   `json:"permission"`
-	ExpireAt       int64  `json:"expire_at"`
-	UnlimitedUntil int64  `json:"unlimited_until"`
-	CreateAt       int64  `json:"create_at"`
-	BanUntil       int64  `json:"ban_until"`
-	BanReason      string `json:"ban_reason"`
+	UserName   string `json:"username"`
+	GameID     int    `json:"game_id"`
+	Permission uint   `json:"permission"`
+	CreateAt   int64  `json:"create_at"`
+	BanUntil   int64  `json:"ban_until"`
+	BanReason  string `json:"ban_reason"`
 }
 
 func (*User) Query(c *gin.Context) {
@@ -45,25 +43,14 @@ func (*User) Query(c *gin.Context) {
 		banUntil = usrBanRecord.Until.Time.UnixMilli()
 		banReason = usrBanRecord.Reason
 	}
-	// Query user unlimited time
-	var unlimitedUntil int64
-	if usr.UnlimitedUntil.Valid {
-		unlimitedUntil = usr.UnlimitedUntil.Time.UnixMilli()
-	}
-	var ExpireAt int64
-	if usr.ExpireAt.Valid {
-		ExpireAt = usr.ExpireAt.Time.UnixMilli()
-	}
 	// Pack user info
 	c.JSON(http.StatusOK, giner.MakeHTTPResponse(true).SetMessage("查询用户成功").SetData(&QueryResponseData{
-		UserName:       usr.Username,
-		GameID:         usr.GameID,
-		Permission:     usr.Permission,
-		ExpireAt:       ExpireAt,
-		UnlimitedUntil: unlimitedUntil,
-		CreateAt:       usr.CreatedAt.UnixMilli(),
-		BanUntil:       banUntil,
-		BanReason:      banReason,
+		UserName:   usr.Username,
+		GameID:     usr.GameID,
+		Permission: usr.Permission,
+		CreateAt:   usr.CreatedAt.UnixMilli(),
+		BanUntil:   banUntil,
+		BanReason:  banReason,
 	}))
 	// Create log
 	c.Set("log", fmt.Sprintf("管理权限查询用户成功, 目标用户名: %s", req.UserName))

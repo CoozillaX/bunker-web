@@ -51,13 +51,6 @@ func RegisterOpenAPI(router *gin.Engine) {
 			c.String(http.StatusOK, "Welcome to BunkerWeb OpenAPI!")
 		})
 
-		// User
-		userGroupWithoutAuth := openApiGroup.Group("/user")
-		{
-			// Redeem
-			userGroupWithoutAuth.POST("/redeem", routers.OpenAPI.User.Redeem)
-		}
-
 		// Swagger
 		openApiGroup.GET("/swagger/*any", ginSwagger.WrapHandler(
 			swaggerfiles.Handler,
@@ -198,8 +191,6 @@ func RegisterWebAPI(router *gin.Engine) {
 			userGroup.GET("/logout", routers.API.User.Logout)
 			// Remove account
 			userGroup.POST("/remove_account", routers.API.User.RemoveAccount)
-			// Use redeem code
-			userGroup.POST("/redeem", routers.API.User.Redeem)
 			// API key group
 			apiKeyGroup := userGroup.Group("/api_key")
 			{
@@ -220,26 +211,14 @@ func RegisterWebAPI(router *gin.Engine) {
 			userGroup.Use(middlewares.NormalPermissionHandler())
 			{
 				// Bind game id
-				userGroup.POST("/bind_game_id", routers.API.User.BindGameId)
+				userGroup.GET("/bind_game_id", routers.API.User.BindGameId)
+
+				// Unbind game id
+				userGroup.GET("/unbind_game_id", routers.API.User.UnbindGameId)
 
 				// Get fbtoken file
 				userGroup.GET("/get_phoenix_token", routers.API.User.GetPhoenixToken)
 			}
-		}
-
-		// APIs related to slot
-		slotGroup := apiGroup.Group("/slot")
-		{
-			// Delete
-			slotGroup.POST("/delete", routers.API.Slot.Delete)
-		}
-		// Normal permission check
-		slotGroup.Use(middlewares.NormalPermissionHandler())
-		{
-			// Set game id
-			slotGroup.POST("/set_game_id", routers.API.Slot.SetGameID)
-			// Extend expire time
-			slotGroup.POST("/extend_expire_time", routers.API.Slot.ExtendExpireTime)
 		}
 
 		// Helper is a user which used to login to server
@@ -308,12 +287,6 @@ func RegisterWebAPI(router *gin.Engine) {
 		adminGroup := apiGroup.Group("/admin")
 		adminGroup.Use(middlewares.AdminPermissionHandler())
 		{
-			// Redeem code group
-			redeemCodeGroup := adminGroup.Group("/redeem_code")
-			{
-				// Generate redeem code
-				redeemCodeGroup.POST("/generate", routers.API.Admin.RedeemCode.Generate)
-			}
 			// Unlimited server group
 			unlimitedServerGroup := adminGroup.Group("/unlimited_server")
 			{
@@ -329,10 +302,6 @@ func RegisterWebAPI(router *gin.Engine) {
 			{
 				// Ban user
 				userGroup.POST("/ban", routers.API.Admin.User.Ban)
-				// Extend user expire time
-				userGroup.POST("/extend_expire_time", routers.API.Admin.User.ExtendExpireTime)
-				// Extend user unlimited time
-				userGroup.POST("/extend_unlimited_time", routers.API.Admin.User.ExtendUnlimitedTime)
 				// Query user info by username
 				userGroup.POST("/query", routers.API.Admin.User.Query)
 				// Set user permission

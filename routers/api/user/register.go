@@ -28,7 +28,7 @@ func (*User) Register(c *gin.Context) {
 		return
 	}
 	// Create user
-	if _, ginerr := user.Create(req.UserName, req.Password, user.PermissionGuest); ginerr != nil {
+	if _, ginerr := user.Create(req.UserName, req.Password, user.PermissionNormal); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

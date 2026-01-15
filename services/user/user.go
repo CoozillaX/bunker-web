@@ -6,21 +6,17 @@ import (
 	"bunker-web/pkg/fbtoken"
 	"bunker-web/pkg/giner"
 	"bunker-web/pkg/utils"
-	"bunker-web/services/slot"
 	"bunker-web/services/unlimited_rental_server"
 	"bunker-web/services/user_ban_record"
-	"database/sql"
-	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 const (
-	PermissionGuest  = iota // Can login to user center, but not allowed to use any functions
-	PermissionNormal        // Allow login to rental server but with limitation (their own servers) and period limitation
-	PermissionAdmin         // Allow manage other accounts
+	PermissionNormal    = iota // Allow login to rental server but with limitation (their own servers) and period limitation
+	PermissionDeveloper        // Allow login to rental server without limitation
+	PermissionAdmin            // Allow manage other accounts
 )
 
 const (
@@ -58,57 +54,13 @@ func Remove(u *models.User) *gin.Error {
 	if u.OwnerMpayUser != nil {
 		models.DBRemove(u.OwnerMpayUser)
 	}
-	// Remove slots
-	slot.DeleteAllByUserID(u.ID)
 	return giner.NewPrivateGinError(models.DBRemove(u))
-}
-
-func ExtendExpireTime(u *models.User, second int64) *gin.Error {
-	if time.Now().After(u.ExpireAt.Time) {
-		u.ExpireAt = sql.NullTime{
-			Time:  time.Now().Add(time.Duration(second) * time.Second),
-			Valid: true,
-		}
-	} else {
-		u.ExpireAt = sql.NullTime{
-			Time:  u.ExpireAt.Time.Add(time.Duration(second) * time.Second),
-			Valid: true,
-		}
-	}
-	return giner.NewPrivateGinError(models.DBSave(u))
-}
-
-func ExtendUnlimitedTime(u *models.User, second int64) *gin.Error {
-	if time.Now().After(u.UnlimitedUntil.Time) {
-		u.UnlimitedUntil = sql.NullTime{
-			Time:  time.Now().Add(time.Duration(second) * time.Second),
-			Valid: true,
-		}
-	} else {
-		u.UnlimitedUntil = sql.NullTime{
-			Time:  u.UnlimitedUntil.Time.Add(time.Duration(second) * time.Second),
-			Valid: true,
-		}
-	}
-	return giner.NewPrivateGinError(models.DBSave(u))
 }
 
 func CheckIfVaild(u *models.User) (bool, string) {
 	// Check ban
 	if banRecord, _ := user_ban_record.GetCurrentBanRecordFormattedStringByUserID(u.ID); len(banRecord) > 0 {
 		return false, banRecord
-	}
-	// Check permission
-	switch u.Permission {
-	case PermissionGuest:
-		// EVENT
-		// return false, "账户未激活"
-	case PermissionNormal:
-		// DISABLED
-		// // Check if unlimited and expire time
-		// if time.Now().After(u.ExpireAt.Time) && time.Now().After(u.UnlimitedUntil.Time) {
-		// 	return false, "账户不在有效期内"
-		// }
 	}
 	return true, ""
 }
@@ -198,12 +150,8 @@ func PhoenixLogin(ip, token, username, hashedPassword string) (usr *models.User,
 }
 
 func GameLicenseCheck(u *models.User, serverCode string, ownerID int) *gin.Error {
-	// Check user if admin
-	if u.Permission == PermissionAdmin {
-		return nil
-	}
-	// Check user if unlimited
-	if u.Permission < PermissionAdmin && time.Now().Before(u.UnlimitedUntil.Time) {
+	// Check user if developer or admin
+	if u.Permission >= PermissionDeveloper {
 		return nil
 	}
 	// Check server if unlimited
@@ -212,23 +160,13 @@ func GameLicenseCheck(u *models.User, serverCode string, ownerID int) *gin.Error
 	}
 	// Check if not bind owner
 	if u.GameID == 0 {
-		u.GameID = ownerID
-		return giner.NewPrivateGinError(models.DBSave(u))
+		return giner.NewPublicGinError("请前往用户中心绑定游戏ID后再尝试登录")
 	}
 	// Check if owner
 	if u.GameID == ownerID {
 		return nil
 	}
-	// Check if slot
-	if err := slot.CheckIfVaild(u.ID, ownerID); err != nil {
-		return giner.NewPublicGinError(
-			fmt.Sprintf(
-				"登录失败, %v",
-				err.Error(),
-			),
-		)
-	}
-	return nil
+	return giner.NewPublicGinError("登录失败，此服务器拥有者的游戏ID与当前绑定的游戏ID不匹配")
 }
 
 func DeleteHelper(u *models.User) *gin.Error {

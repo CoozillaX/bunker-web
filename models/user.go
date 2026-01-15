@@ -16,9 +16,7 @@ type User struct {
 	Password           string
 	Email              string
 	Permission         uint
-	UnlimitedUntil     sql.NullTime
 	GameID             int
-	ExpireAt           sql.NullTime
 	HelperMpayUserID   uint
 	HelperMpayUserType MpayUserType
 	OwnerMpayUserID    uint

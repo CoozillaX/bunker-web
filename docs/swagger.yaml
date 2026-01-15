@@ -4,9 +4,6 @@ definitions:
       create_at:
         description: 创建时间
         type: integer
-      expire_at:
-        description: 有效期至
-        type: integer
       game_id:
         description: 绑定的游戏ID
         type: integer
@@ -18,21 +15,8 @@ definitions:
         items:
           $ref: '#/definitions/bunker-web_routers_openapi_user.Slot'
         type: array
-      unlimited_until:
-        description: 无限制权限截止时间
-        type: integer
       username:
         description: 用户名
-        type: string
-    type: object
-  bunker-web_routers_openapi_user.RedeemRequest:
-    properties:
-      redeem_code:
-        description: 要使用的兑换码
-        type: string
-      username:
-        description: 用户名
-        minLength: 1
         type: string
     type: object
   bunker-web_routers_openapi_user.Slot:
@@ -317,23 +301,6 @@ definitions:
       success:
         description: 是否成功
         type: boolean
-    type: object
-  user.RedeemResponse:
-    properties:
-      data:
-        $ref: '#/definitions/user.RedeemResponseData'
-      message:
-        description: 成功或失败原因
-        type: string
-      success:
-        description: 是否成功
-        type: boolean
-    type: object
-  user.RedeemResponseData:
-    properties:
-      result:
-        description: 兑换结果
-        type: string
     type: object
 info:
   contact: {}
@@ -737,28 +704,6 @@ paths:
           schema:
             $ref: '#/definitions/user.GetStatusResponse'
       summary: 用户信息查询
-      tags:
-      - 用户中心
-  /openapi/user/redeem:
-    post:
-      consumes:
-      - application/json
-      description: 使用兑换码, 无需进行登录验证
-      parameters:
-      - description: 请求时需要在 Body 携带以下查询参数
-        in: body
-        name: Request
-        required: true
-        schema:
-          $ref: '#/definitions/bunker-web_routers_openapi_user.RedeemRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功时返回
-          schema:
-            $ref: '#/definitions/user.RedeemResponse'
-      summary: 使用兑换码
       tags:
       - 用户中心
 swagger: "2.0"

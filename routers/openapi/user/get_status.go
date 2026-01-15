@@ -3,7 +3,6 @@ package user
 import (
 	"bunker-web/models"
 	"bunker-web/pkg/giner"
-	"bunker-web/services/slot"
 	"bunker-web/services/user"
 	"net/http"
 
@@ -17,13 +16,11 @@ type Slot struct {
 }
 
 type GetStatusResponseData struct {
-	Username       string  `json:"username"`        // 用户名
-	GameID         int     `json:"game_id"`         // 绑定的游戏ID
-	UnlimitedUntil int64   `json:"unlimited_until"` // 无限制权限截止时间
-	IsAdmin        bool    `json:"is_admin"`        // 是否为系统管理员
-	CreateAt       int64   `json:"create_at"`       // 创建时间
-	ExpireAt       int64   `json:"expire_at"`       // 有效期至
-	Slots          []*Slot `json:"slots"`           // Slots 列表
+	Username string  `json:"username"`  // 用户名
+	GameID   int     `json:"game_id"`   // 绑定的游戏ID
+	IsAdmin  bool    `json:"is_admin"`  // 是否为系统管理员
+	CreateAt int64   `json:"create_at"` // 创建时间
+	Slots    []*Slot `json:"slots"`     // Slots 列表
 }
 
 type GetStatusResponse struct {
@@ -47,32 +44,12 @@ func (*User) GetStatus(c *gin.Context) {
 	// Get user
 	u, _ := c.Get("usr")
 	usr := u.(*models.User)
-	// Query user unlimited time
-	var unlimitedUntil int64
-	if usr.UnlimitedUntil.Valid {
-		unlimitedUntil = usr.UnlimitedUntil.Time.UnixMilli()
-	}
-	var ExpireAt int64
-	if usr.ExpireAt.Valid {
-		ExpireAt = usr.ExpireAt.Time.UnixMilli()
-	}
-	var Slots []*Slot
-	for _, s := range slot.QuerySlotListByUserID(usr.ID) {
-		Slots = append(Slots, &Slot{
-			GameID:   s.GameID,
-			ExpireAt: s.ExpireAt.Time.UnixMilli(),
-			Note:     s.Note,
-		})
-	}
 	// Pack user info
 	c.JSON(http.StatusOK, giner.MakeHTTPResponse(true).SetData(&GetStatusResponseData{
-		Username:       usr.Username,
-		GameID:         usr.GameID,
-		UnlimitedUntil: unlimitedUntil,
-		IsAdmin:        usr.Permission == user.PermissionAdmin,
-		CreateAt:       usr.CreatedAt.UnixMilli(),
-		ExpireAt:       ExpireAt,
-		Slots:          Slots,
+		Username: usr.Username,
+		GameID:   usr.GameID,
+		IsAdmin:  usr.Permission == user.PermissionAdmin,
+		CreateAt: usr.CreatedAt.UnixMilli(),
 	}))
 	// Create log
 	c.Set("log", "获取usr信息成功")

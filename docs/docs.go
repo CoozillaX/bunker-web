@@ -579,40 +579,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/openapi/user/redeem": {
-            "post": {
-                "description": "使用兑换码, 无需进行登录验证",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "用户中心"
-                ],
-                "summary": "使用兑换码",
-                "parameters": [
-                    {
-                        "description": "请求时需要在 Body 携带以下查询参数",
-                        "name": "Request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/bunker-web_routers_openapi_user.RedeemRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功时返回",
-                        "schema": {
-                            "$ref": "#/definitions/user.RedeemResponse"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -621,10 +587,6 @@ const docTemplate = `{
             "properties": {
                 "create_at": {
                     "description": "创建时间",
-                    "type": "integer"
-                },
-                "expire_at": {
-                    "description": "有效期至",
                     "type": "integer"
                 },
                 "game_id": {
@@ -642,27 +604,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/bunker-web_routers_openapi_user.Slot"
                     }
                 },
-                "unlimited_until": {
-                    "description": "无限制权限截止时间",
-                    "type": "integer"
-                },
                 "username": {
                     "description": "用户名",
                     "type": "string"
-                }
-            }
-        },
-        "bunker-web_routers_openapi_user.RedeemRequest": {
-            "type": "object",
-            "properties": {
-                "redeem_code": {
-                    "description": "要使用的兑换码",
-                    "type": "string"
-                },
-                "username": {
-                    "description": "用户名",
-                    "type": "string",
-                    "minLength": 1
                 }
             }
         },
@@ -1063,31 +1007,6 @@ const docTemplate = `{
                 "success": {
                     "description": "是否成功",
                     "type": "boolean"
-                }
-            }
-        },
-        "user.RedeemResponse": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/user.RedeemResponseData"
-                },
-                "message": {
-                    "description": "成功或失败原因",
-                    "type": "string"
-                },
-                "success": {
-                    "description": "是否成功",
-                    "type": "boolean"
-                }
-            }
-        },
-        "user.RedeemResponseData": {
-            "type": "object",
-            "properties": {
-                "result": {
-                    "description": "兑换结果",
-                    "type": "string"
                 }
             }
         }

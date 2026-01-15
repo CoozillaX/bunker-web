@@ -6,7 +6,6 @@ import (
 	"bunker-web/routers/api/notice"
 	"bunker-web/routers/api/owner"
 	"bunker-web/routers/api/phoenix"
-	"bunker-web/routers/api/slot"
 	"bunker-web/routers/api/user"
 	"bunker-web/routers/api/webauthn"
 )
@@ -17,7 +16,6 @@ type API struct {
 	helper.Helper
 	owner.Owner
 	phoenix.Phoenix
-	slot.Slot
 	user.User
 	webauthn.Webauthn
 }
