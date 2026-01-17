@@ -49,7 +49,7 @@ func requestServerInfo(
 	// change engine version by cache
 	if value, ok := versionCache.Get(req.ServerCode); ok {
 		if err := mu.UpdateGameInfoByBedrockVersion(value.(string)); err != nil {
-			return nil, nil, giner.NewPrivateGinError(err)
+			return nil, nil, giner.NewPublicGinError(fmt.Sprintf("无法获取游戏信息: %s", err.Error()))
 		}
 	}
 	// g79 login
