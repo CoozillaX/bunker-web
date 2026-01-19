@@ -63,13 +63,28 @@ func (*Phoenix) TransferCheckNum(c *gin.Context) {
 		c.Error(giner.NewPublicGinError("无效参数"))
 		return
 	}
+	mcpData, ok := dataList[0].(string)
+	if !ok || mcpData == "" {
+		c.Error(giner.NewPublicGinError("无效参数"))
+		return
+	}
+	salt, ok := dataList[1].(string)
+	if !ok || salt == "" {
+		c.Error(giner.NewPublicGinError("无效参数"))
+		return
+	}
+	uid, ok := dataList[2].(float64)
+	if !ok || uid <= 0 {
+		c.Error(giner.NewPublicGinError("无效参数"))
+		return
+	}
 	// Get check num
 	result, err := mcp.GetMCPCheckNum(
 		engineVersion.(string),
 		patchVersion.(string),
-		dataList[0].(string),
-		dataList[1].(string),
-		strconv.Itoa(int(dataList[2].(float64))),
+		mcpData,
+		salt,
+		strconv.Itoa(int(uid)),
 		platform.(string),
 	)
 	if err != nil {

@@ -34,10 +34,8 @@ type LoginResponse struct {
 	GrowthLevel int             `json:"growth_level,omitempty"`
 	Dry         bool            `json:"dry,omitempty"`
 	Token       string          `json:"token,omitempty"`
-	ResponseTo  string          `json:"respond_to,omitempty"`
 	SkinInfo    *SkinInfo       `json:"skin_info,omitempty"`
 	OutfitInfo  map[string]*int `json:"outfit_info,omitempty"`
-	ServerMsg   string          `json:"server_msg,omitempty"`
 }
 
 var versionCache = cache.New(24*time.Hour, time.Hour) // cache[serverCode]bedrockVersion
