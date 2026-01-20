@@ -6,7 +6,7 @@ import (
 	"bunker-web/pkg/sessions"
 	"encoding/json"
 	"net/http"
-	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -55,7 +55,9 @@ func (*Phoenix) TransferCheckNum(c *gin.Context) {
 	}
 	// Parse fb req
 	var dataList []any
-	if err := json.Unmarshal([]byte(req.Data), &dataList); err != nil {
+	decoder := json.NewDecoder(strings.NewReader(req.Data))
+	decoder.UseNumber()
+	if err := decoder.Decode(&dataList); err != nil {
 		c.Error(giner.NewPublicGinError("无效参数"))
 		return
 	}
@@ -73,8 +75,8 @@ func (*Phoenix) TransferCheckNum(c *gin.Context) {
 		c.Error(giner.NewPublicGinError("无效参数"))
 		return
 	}
-	uid, ok := dataList[2].(float64)
-	if !ok || uid <= 0 {
+	uid, ok := dataList[2].(json.Number)
+	if !ok {
 		c.Error(giner.NewPublicGinError("无效参数"))
 		return
 	}
@@ -84,7 +86,7 @@ func (*Phoenix) TransferCheckNum(c *gin.Context) {
 		patchVersion.(string),
 		mcpData,
 		salt,
-		strconv.Itoa(int(uid)),
+		uid.String(),
 		platform.(string),
 	)
 	if err != nil {
