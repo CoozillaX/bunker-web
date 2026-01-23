@@ -4,7 +4,6 @@ import (
 	"bunker-core/protocol/g79"
 	"bunker-web/models"
 	"bunker-web/pkg/giner"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -37,8 +36,7 @@ func init() {
 
 func HandleG79Login(mu models.MpayUser) (*g79.G79User, *gin.Error) {
 	// check cache
-	cacheKey := strconv.FormatUint(uint64(mu.GetID()), 10)
-	if cached, ok := g79UserCache.Get(cacheKey); ok {
+	if cached, ok := g79UserCache.Get(mu.GetUid() + mu.GetEngineVersion()); ok {
 		item := cached.(*g79UserCacheItem)
 		gu := item.gu
 		// if version match?
@@ -46,7 +44,7 @@ func HandleG79Login(mu models.MpayUser) (*g79.G79User, *gin.Error) {
 			// if still valid ?
 			if _, _, protocolErr := gu.AccOnlineExp(); protocolErr == nil {
 				item.ttl = defaultTTL // refresh ttl
-				g79UserCache.SetDefault(cacheKey, item)
+				g79UserCache.SetDefault(mu.GetUid()+mu.GetEngineVersion(), item)
 				return gu, nil
 			}
 		}
@@ -57,7 +55,7 @@ func HandleG79Login(mu models.MpayUser) (*g79.G79User, *gin.Error) {
 		return nil, giner.NewGinErrorFromProtocolErr(protocolErr)
 	}
 	// cache
-	g79UserCache.SetDefault(cacheKey, &g79UserCacheItem{
+	g79UserCache.SetDefault(mu.GetUid()+mu.GetEngineVersion(), &g79UserCacheItem{
 		gu:  gu,
 		ttl: defaultTTL,
 	})
