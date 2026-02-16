@@ -82,15 +82,13 @@ func (*Phoenix) Login(c *gin.Context) {
 		return
 	}
 	// Login and get usr
-	usr, ginerr := user.PhoenixLogin(c.ClientIP(), req.FBToken, req.UserName, req.Password)
-	if usr != nil {
-		session.Store("usr", usr)
-	}
+	usr, ginerr := user.PhoenixLogin(req.FBToken, req.UserName, req.Password)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return
 	}
 	// Setup session info
+	session.Store("usr", usr)
 	session.Store("isPhoenix", true)
 	// Handle dry Login
 	if req.ServerCode == "::DRY::" && req.ServerPasscode == "::DRY::" {

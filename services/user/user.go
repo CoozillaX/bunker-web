@@ -76,15 +76,15 @@ func QueryByUsername(username string) (*models.User, *gin.Error) {
 	return &user, nil
 }
 
-func QueryByToken(token, currentHashedIP string) (*models.User, *gin.Error) {
+func QueryByToken(token string) (*models.User, *gin.Error) {
 	// 1. Parse token
 	username, saltedPassword, err := fbtoken.Decrypt(token)
 	if err != nil {
 		return nil, giner.NewPublicGinError("无效的Token")
 	}
 	// 2. Check password
-	usr, ginerr := NormalLogin(username, saltedPassword)
-	if ginerr != nil {
+	usr, _ := QueryByUsername(username)
+	if usr == nil || saltedPassword != usr.Password {
 		return nil, giner.NewPublicGinError("Token已失效, 请重新获取")
 	}
 	return usr, nil
@@ -123,28 +123,28 @@ func QueryUserByID(id uint) (*models.User, *gin.Error) {
 	return &user, nil
 }
 
-func NormalLogin(username, saltedPassword string) (*models.User, *gin.Error) {
+func NormalLogin(username, hashedPassword string) (*models.User, *gin.Error) {
 	usr, _ := QueryByUsername(username)
-	if usr == nil || saltedPassword != usr.Password {
-		return nil, giner.SetTranslationCode(giner.NewPublicGinError("无效的用户中心用户名或密码"), giner.C_Auth_InvalidUser)
+	if usr == nil || utils.SHA256Hex([]byte(hashedPassword+configs.USER_PSW_SALT)) != usr.Password {
+		return nil, giner.NewPublicGinError("无效的用户中心用户名或密码")
 	}
 	return usr, nil
 }
 
-func PhoenixLogin(ip, token, username, hashedPassword string) (usr *models.User, ginerr *gin.Error) {
+func PhoenixLogin(token, username, hashedPassword string) (usr *models.User, ginerr *gin.Error) {
 	// Token or password login
 	if token != "" {
-		if usr, ginerr = QueryByToken(token, utils.MD5Hex([]byte(ip))); ginerr != nil {
-			return nil, giner.SetTranslationCode(ginerr, giner.C_Auth_InvalidToken)
+		if usr, ginerr = QueryByToken(token); ginerr != nil {
+			return nil, ginerr
 		}
 	} else {
-		if usr, ginerr = NormalLogin(username, utils.SHA256Hex([]byte(hashedPassword+configs.USER_PSW_SALT))); ginerr != nil {
+		if usr, ginerr = NormalLogin(username, hashedPassword); ginerr != nil {
 			return nil, ginerr
 		}
 	}
 	// Check if vaild
 	if vaild, reason := CheckIfVaild(usr); !vaild {
-		return usr, giner.NewPublicGinError(reason)
+		return nil, giner.NewPublicGinError(reason)
 	}
 	return usr, nil
 }

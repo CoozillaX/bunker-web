@@ -1,11 +1,5 @@
 package giner
 
-const (
-	C_Auth_HelperNotCreated = 7
-	C_Auth_InvalidToken     = 10
-	C_Auth_InvalidUser      = 11
-)
-
 type BasicResponse struct {
 	Success bool   `json:"success"` // 是否成功
 	Message string `json:"message"` // 成功或失败原因

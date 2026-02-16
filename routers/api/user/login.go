@@ -4,7 +4,6 @@ import (
 	"bunker-web/configs"
 	"bunker-web/pkg/giner"
 	"bunker-web/pkg/sessions"
-	"bunker-web/pkg/utils"
 	"bunker-web/services/user"
 	"bunker-web/services/user_ban_record"
 	"net/http"
@@ -27,7 +26,7 @@ func (*User) Login(c *gin.Context) {
 		return
 	}
 	// Login
-	usr, ginerr := user.NormalLogin(req.UserName, utils.SHA256Hex([]byte(req.Password+configs.USER_PSW_SALT)))
+	usr, ginerr := user.NormalLogin(req.UserName, req.Password)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return
