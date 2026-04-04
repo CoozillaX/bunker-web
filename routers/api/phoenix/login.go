@@ -1,6 +1,7 @@
 package phoenix
 
 import (
+	"bunker-core/protocol/defines"
 	"bunker-core/protocol/g79"
 	"bunker-web/models"
 	"bunker-web/pkg/fbtoken"
@@ -56,19 +57,25 @@ func requestServerInfo(
 		return nil, nil, ginerr
 	}
 	// chain info
-	rentalInfo, protocolErr := gu.ImpactRentalServer(req.ServerCode, req.ServerPasscode, req.ClientPublicKey)
+	var serverInfo *g79.MCServerInfo
+	var protocolErr *defines.ProtocolError
+	if after, ok := strings.CutPrefix(req.ServerCode, "#"); ok {
+		serverInfo, protocolErr = gu.ImpactRealmsServer(after, req.ClientPublicKey)
+	} else {
+		serverInfo, protocolErr = gu.ImpactRentalServer(req.ServerCode, req.ServerPasscode, req.ClientPublicKey)
+	}
 	if protocolErr != nil {
 		return nil, nil, giner.NewGinErrorFromProtocolErr(protocolErr)
 	}
 	// cache version
-	rentalBedrockVersion := strings.TrimSuffix(rentalInfo.MCVersion, "-release")
+	rentalBedrockVersion := strings.TrimSuffix(serverInfo.MCVersion, "-release")
 	versionCache.SetDefault(req.ServerCode, rentalBedrockVersion)
 	// check version
 	if gu.GetBedrockVersion() != rentalBedrockVersion {
 		// re-login and get chain with updated engine version
 		return requestServerInfo(mu, req)
 	}
-	return gu, rentalInfo, nil
+	return gu, serverInfo, nil
 }
 
 func (*Phoenix) Login(c *gin.Context) {
