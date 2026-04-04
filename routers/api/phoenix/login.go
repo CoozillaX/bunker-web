@@ -43,7 +43,7 @@ var versionCache = cache.New(24*time.Hour, time.Hour) // cache[serverCode]bedroc
 func requestServerInfo(
 	mu models.MpayUser,
 	req *LoginRequest,
-) (*g79.G79User, *g79.RentalServerInfo, *gin.Error) {
+) (*g79.G79User, *g79.MCServerInfo, *gin.Error) {
 	// change engine version by cache
 	if value, ok := versionCache.Get(req.ServerCode); ok {
 		if err := mu.UpdateGameInfoByBedrockVersion(value.(string)); err != nil {
