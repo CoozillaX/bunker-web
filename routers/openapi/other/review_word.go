@@ -58,12 +58,18 @@ func (*Other) ReviewWord(c *gin.Context) {
 		c.Error(giner.NewPublicGinError("无效参数"))
 		return
 	}
-	// Check if reviewer is initialised
+	// Check if reviewer need to be initialised or updated
 	if reviewer == nil || time.Since(lastUpdateTime) > time.Hour {
 		var err error
-		reviewer, err = review.New(context.Background())
+
+		if reviewer == nil {
+			reviewer, err = review.New(context.Background())
+		} else {
+			_, err = reviewer.Reload(context.Background())
+		}
+
 		if err != nil {
-			c.Error(giner.NewPublicGinError("敏感词检测器初始化失败"))
+			c.Error(giner.NewPublicGinError("初始化/更新敏感词检查器时出现问题"))
 			return
 		}
 		lastUpdateTime = time.Now()
