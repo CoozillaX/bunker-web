@@ -1,6 +1,6 @@
 module bunker-web
 
-go 1.23.1
+go 1.26.0
 
 require (
 	github.com/gin-contrib/gzip v1.0.1
@@ -17,7 +17,14 @@ require (
 )
 
 require (
+	github.com/ulikunitz/xz v0.5.15 // indirect
+	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
+	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
+)
+
+require (
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/CoozillaX/g79-regex v0.1.0
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/bytedance/sonic v1.12.6 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect

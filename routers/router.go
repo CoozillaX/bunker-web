@@ -51,6 +51,13 @@ func RegisterOpenAPI(router *gin.Engine) {
 			c.String(http.StatusOK, "Welcome to BunkerWeb OpenAPI!")
 		})
 
+		// Other APIs
+		otherGroup := openApiGroup.Group("/other")
+		{
+			// Review word
+			otherGroup.POST("/review_text", routers.OpenAPI.Other.ReviewWord)
+		}
+
 		// Swagger
 		openApiGroup.GET("/swagger/*any", ginSwagger.WrapHandler(
 			swaggerfiles.Handler,
