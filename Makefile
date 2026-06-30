@@ -1,7 +1,7 @@
 # COPIED FROM https://github.com/CMA2401PT/neomega/blob/main/omega_launcher/Makefile
 
 # define go build flags
-GO_CGO_FLAGS_COMMON:=CGO_ENABLED=0
+GO_CGO_FLAGS_COMMON:=CGO_ENABLED=1
 GO_BUILD_FLAGS_COMMON:=-trimpath -ldflags "-s -w" -tags "jsoniter"
 # end define go build flags
 
