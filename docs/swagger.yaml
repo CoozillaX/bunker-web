@@ -165,7 +165,7 @@ definitions:
   other.ReviewWordRequest:
     properties:
       channel:
-        description: 检测频道, 不填写则使用默认值 item_comment
+        description: 检测频道, 不填写则使用默认值 item_comment (仅在非昵称检测时使用)
         example: item_comment
         maxLength: 100
         type: string
@@ -174,14 +174,18 @@ definitions:
         minLength: 1
         type: string
       first_only:
-        description: 是否只返回第一个匹配的敏感词, 默认为 false
+        description: 是否只返回第一个匹配的敏感词 (快速匹配), 默认为 false
         example: false
         type: boolean
       level:
-        description: 检测级别, 不填写则使用默认值 0
+        description: 检测级别, 不填写则使用默认值 0 (仅在非昵称检测时使用)
         example: "0"
         maxLength: 100
         type: string
+      nickname:
+        description: 是否为昵称检测, 默认为 false
+        example: false
+        type: boolean
     type: object
   other.ReviewWordResponse:
     properties:

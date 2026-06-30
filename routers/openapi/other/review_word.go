@@ -20,9 +20,10 @@ type ReviewResult struct {
 
 type ReviewWordRequest struct {
 	Content   string `json:"content" binding:"min=1"`                          // 被检测的文本
-	Level     string `json:"level" binding:"max=100" example:"0"`              // 检测级别, 不填写则使用默认值 0
-	Channel   string `json:"channel" binding:"max=100" example:"item_comment"` // 检测频道, 不填写则使用默认值 item_comment
-	FirstOnly bool   `json:"first_only" example:"false"`                       // 是否只返回第一个匹配的敏感词, 默认为 false
+	Level     string `json:"level" binding:"max=100" example:"0"`              // 检测级别, 不填写则使用默认值 0 (仅在非昵称检测时使用)
+	Channel   string `json:"channel" binding:"max=100" example:"item_comment"` // 检测频道, 不填写则使用默认值 item_comment (仅在非昵称检测时使用)
+	Nickname  bool   `json:"nickname" example:"false"`                         // 是否为昵称检测, 默认为 false
+	FirstOnly bool   `json:"first_only" example:"false"`                       // 是否只返回第一个匹配的敏感词 (快速匹配), 默认为 false
 }
 
 type ReviewWordResponse struct {
@@ -78,6 +79,7 @@ func (*Other) ReviewWord(c *gin.Context) {
 	result := reviewer.ReviewWord(req.Content, &review.Options{
 		Level:     req.Level,
 		Channel:   req.Channel,
+		Nickname:  req.Nickname,
 		FirstOnly: req.FirstOnly,
 	})
 	var data []ReviewResult

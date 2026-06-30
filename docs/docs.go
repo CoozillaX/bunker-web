@@ -855,7 +855,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "channel": {
-                    "description": "检测频道, 不填写则使用默认值 item_comment",
+                    "description": "检测频道, 不填写则使用默认值 item_comment (仅在非昵称检测时使用)",
                     "type": "string",
                     "maxLength": 100,
                     "example": "item_comment"
@@ -866,15 +866,20 @@ const docTemplate = `{
                     "minLength": 1
                 },
                 "first_only": {
-                    "description": "是否只返回第一个匹配的敏感词, 默认为 false",
+                    "description": "是否只返回第一个匹配的敏感词 (快速匹配), 默认为 false",
                     "type": "boolean",
                     "example": false
                 },
                 "level": {
-                    "description": "检测级别, 不填写则使用默认值 0",
+                    "description": "检测级别, 不填写则使用默认值 0 (仅在非昵称检测时使用)",
                     "type": "string",
                     "maxLength": 100,
                     "example": "0"
+                },
+                "nickname": {
+                    "description": "是否为昵称检测, 默认为 false",
+                    "type": "boolean",
+                    "example": false
                 }
             }
         },
