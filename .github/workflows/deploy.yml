@@ -30,6 +30,8 @@ jobs:
 
       - name: Build backend
         working-directory: bunker-web
+        env:
+          CGO_ENABLED: "1"
         run: |
           make
           ls -lh build/
