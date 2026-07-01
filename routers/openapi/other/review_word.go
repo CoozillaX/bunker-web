@@ -28,7 +28,7 @@ type ReviewWordRequest struct {
 
 type ReviewWordResponse struct {
 	giner.BasicResponse
-	Data []ReviewResult `json:"data"`
+	Data []ReviewResult `json:"data"` // 检测结果, 包含所有匹配的敏感词信息; 未匹配到敏感词此项为空
 }
 
 var (
@@ -82,6 +82,13 @@ func (*Other) ReviewWord(c *gin.Context) {
 		Nickname:  req.Nickname,
 		FirstOnly: req.FirstOnly,
 	})
+	// Check if any sensitive words were found
+	if len(result) == 0 {
+		c.JSON(http.StatusOK, giner.MakeHTTPResponse(true))
+		c.Set("log", "敏感词检查成功, 未发现敏感词")
+		return
+	}
+	// Pack result
 	var data []ReviewResult
 	for _, r := range result {
 		data = append(data, ReviewResult{
@@ -93,7 +100,7 @@ func (*Other) ReviewWord(c *gin.Context) {
 		})
 	}
 	// Pack player info
-	c.JSON(http.StatusOK, giner.MakeHTTPResponse(true).SetData(data))
+	c.JSON(http.StatusOK, giner.MakeHTTPResponse(false).SetData(data))
 	// Create log
-	c.Set("log", "敏感词检查成功")
+	c.Set("log", "敏感词检查成功, 发现敏感词")
 }

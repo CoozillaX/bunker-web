@@ -887,6 +887,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
+                    "description": "检测结果, 包含所有匹配的敏感词信息; 未匹配到敏感词此项为空",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/other.ReviewResult"
