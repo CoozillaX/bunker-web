@@ -631,32 +631,8 @@ const docTemplate = `{
                     "description": "是否为系统管理员",
                     "type": "boolean"
                 },
-                "slots": {
-                    "description": "Slots 列表",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/bunker-web_routers_openapi_user.Slot"
-                    }
-                },
                 "username": {
                     "description": "用户名",
-                    "type": "string"
-                }
-            }
-        },
-        "bunker-web_routers_openapi_user.Slot": {
-            "type": "object",
-            "properties": {
-                "expire_at": {
-                    "description": "Slots 有效期至",
-                    "type": "integer"
-                },
-                "game_id": {
-                    "description": "Slots 绑定的游戏ID",
-                    "type": "integer"
-                },
-                "note": {
-                    "description": "Slots 备注",
                     "type": "string"
                 }
             }

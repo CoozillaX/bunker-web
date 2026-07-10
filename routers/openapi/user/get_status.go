@@ -9,18 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Slot struct {
-	GameID   int    `json:"game_id"`   // Slots 绑定的游戏ID
-	ExpireAt int64  `json:"expire_at"` // Slots 有效期至
-	Note     string `json:"note"`      // Slots 备注
-}
-
 type GetStatusResponseData struct {
-	Username string  `json:"username"`  // 用户名
-	GameID   int     `json:"game_id"`   // 绑定的游戏ID
-	IsAdmin  bool    `json:"is_admin"`  // 是否为系统管理员
-	CreateAt int64   `json:"create_at"` // 创建时间
-	Slots    []*Slot `json:"slots"`     // Slots 列表
+	Username string `json:"username"`  // 用户名
+	GameID   int    `json:"game_id"`   // 绑定的游戏ID
+	IsAdmin  bool   `json:"is_admin"`  // 是否为系统管理员
+	CreateAt int64  `json:"create_at"` // 创建时间
 }
 
 type GetStatusResponse struct {
