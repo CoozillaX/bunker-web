@@ -37,6 +37,11 @@ func OpenAPIKeyHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get session by bearer
 		apiKey := c.GetHeader("Authorization")
+		// Check if is empty
+		if len(apiKey) == 0 {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, giner.MakeHTTPResponse(false).SetMessage("无效的API Key"))
+			return
+		}
 		// Check usr if exists
 		usr, ginerr := user.QueryUserByAPIKey(apiKey)
 		if ginerr != nil {
