@@ -5,6 +5,7 @@ import (
 	"bunker-web/pkg/giner"
 	"bunker-web/pkg/sessions"
 	"bunker-web/pkg/webauthner"
+	"bunker-web/services/user_ban_record"
 	"net/http"
 	"net/url"
 
@@ -23,6 +24,11 @@ func (w *Login) Verification(c *gin.Context) {
 	usr, ginerr := webauthner.FinishDiscoverableLogin(reqId, c.Request)
 	if ginerr != nil {
 		c.Error(ginerr)
+		return
+	}
+	// Ban Check
+	if banRecord, _ := user_ban_record.GetCurrentBanRecordFormattedStringByUserID(usr.ID); len(banRecord) > 0 {
+		c.Error(giner.NewPublicGinError(banRecord))
 		return
 	}
 	// Create bearer
