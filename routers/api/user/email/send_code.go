@@ -78,6 +78,10 @@ func (*Email) SendCode(c *gin.Context) {
 			c.Error(giner.NewPublicGinError("无效请求"))
 			return
 		}
+		if usr.Email != "" {
+			c.Error(giner.NewPublicGinError("请先解绑当前邮箱"))
+			return
+		}
 		if !utils.IsValidEmail(req.Email) {
 			c.Error(giner.NewPublicGinError("无效参数"))
 			return

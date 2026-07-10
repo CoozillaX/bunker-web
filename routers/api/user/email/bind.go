@@ -27,6 +27,10 @@ func (*Email) Bind(c *gin.Context) {
 		c.Error(giner.NewPublicGinError("无效参数"))
 		return
 	}
+	if usr.Email != "" {
+		c.Error(giner.NewPublicGinError("请先解绑当前邮箱"))
+		return
+	}
 	// Check email verify code
 	if !email.CheckVerifyCode(usr.Username, email.EmailVerifyActionTypeMap[email.EmailVerifyActionTypeBind], req.Email, req.EmailVerifyCode) {
 		c.Error(giner.NewPublicGinError("无效的邮箱验证码"))
