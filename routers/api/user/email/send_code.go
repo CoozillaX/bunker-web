@@ -9,6 +9,7 @@ import (
 	"bunker-web/pkg/utils"
 	"bunker-web/services/user"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,17 +21,44 @@ type SendCodeRequest struct {
 	CaptchaToken string `json:"captcha_token" binding:"min=1"`
 }
 
-func (*Email) SendCode(c *gin.Context) {
-	// Get data from session
-	var usr *models.User
-	{
-		bearer, _ := c.Get("bearer")
-		session, _ := sessions.GetSessionByBearer(bearer.(string))
-		u, ok := session.Load("usr")
-		if ok {
-			usr = u.(*models.User)
+// loadOptionalUser resolves the logged-in user when present.
+// This route sits outside BearerHandler so reset-password can stay public;
+// bind/unbind/change/remove still need a valid session from header or cookie.
+func loadOptionalUser(c *gin.Context) *models.User {
+	bearer := ""
+	if v, ok := c.Get("bearer"); ok {
+		if s, ok := v.(string); ok {
+			bearer = s
 		}
 	}
+	if bearer == "" {
+		bearer = strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
+	}
+	if bearer == "" {
+		if cookie, err := c.Cookie(sessions.SESSION_COOKIE_NAME); err == nil {
+			bearer = cookie
+		}
+	}
+	if bearer == "" {
+		return nil
+	}
+	session, ok := sessions.GetSessionByBearer(bearer)
+	if !ok {
+		return nil
+	}
+	u, ok := session.Load("usr")
+	if !ok {
+		return nil
+	}
+	usr, ok := u.(*models.User)
+	if !ok {
+		return nil
+	}
+	return usr
+}
+
+func (*Email) SendCode(c *gin.Context) {
+	usr := loadOptionalUser(c)
 	// Parse request
 	var req SendCodeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -46,6 +74,10 @@ func (*Email) SendCode(c *gin.Context) {
 	var to string
 	switch req.ActionType {
 	case email.EmailVerifyActionTypeBind:
+		if usr == nil {
+			c.Error(giner.NewPublicGinError("无效请求"))
+			return
+		}
 		if !utils.IsValidEmail(req.Email) {
 			c.Error(giner.NewPublicGinError("无效参数"))
 			return
