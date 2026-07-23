@@ -18,6 +18,7 @@ type NoticeData struct {
 	Title      string `json:"title"`
 	Content    string `json:"content"`
 	AuthorName string `json:"author_name"`
+	IsPinned   bool   `json:"is_pinned"`
 	CreateAt   int64  `json:"create_at"`
 }
 
@@ -57,6 +58,7 @@ func (*Notice) Query(c *gin.Context) {
 			Title:      item.Title,
 			Content:    item.Content,
 			AuthorName: item.AuthorName,
+			IsPinned:   item.PinnedAt.Valid,
 			CreateAt:   item.CreatedAt.UnixMilli(),
 		})
 	}

@@ -2,14 +2,20 @@ package announcement
 
 import (
 	"bunker-web/models"
+	"database/sql"
+	"time"
 )
 
-func Create(user *models.User, title, content string) error {
-	return models.DBCreate(&models.Announcement{
+func Create(user *models.User, title, content string, isPinned bool) error {
+	model := &models.Announcement{
 		Title:    title,
 		Content:  content,
 		AuthorID: &user.ID,
-	})
+	}
+	if isPinned {
+		model.PinnedAt = sql.NullTime{Time: time.Now(), Valid: true}
+	}
+	return models.DBCreate(model)
 }
 
 func GetTotal() (int64, error) {
@@ -20,7 +26,12 @@ func GetTotal() (int64, error) {
 
 func QueryByPage(pageNum, pageSize int) ([]*models.Announcement, error) {
 	var announcements []*models.Announcement
-	result := models.DB.Preload("Author").Order("created_at desc").Offset((pageNum - 1) * pageSize).Limit(pageSize).Find(&announcements)
+	result := models.DB.Preload("Author").
+		Order("pinned_at desc").
+		Order("created_at desc").
+		Offset((pageNum - 1) * pageSize).
+		Limit(pageSize).
+		Find(&announcements)
 	if result.Error != nil {
 		return nil, result.Error
 	}

@@ -4,16 +4,19 @@ import (
 	"bunker-web/models"
 	"bunker-web/pkg/giner"
 	"bunker-web/services/announcement"
+	"database/sql"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 type EditRequest struct {
-	ID      int    `json:"id" binding:"gt=0"`
-	Title   string `json:"title" binding:"min=1"`
-	Content string `json:"content" binding:"min=1"`
+	ID       int    `json:"id" binding:"gt=0"`
+	Title    string `json:"title" binding:"min=1"`
+	Content  string `json:"content" binding:"min=1"`
+	IsPinned bool   `json:"is_pinned"`
 }
 
 func (*Notice) Edit(c *gin.Context) {
@@ -32,6 +35,13 @@ func (*Notice) Edit(c *gin.Context) {
 	// Modify notice info
 	notice.Title = req.Title
 	notice.Content = req.Content
+	if req.IsPinned {
+		if !notice.PinnedAt.Valid {
+			notice.PinnedAt = sql.NullTime{Time: time.Now(), Valid: true}
+		}
+	} else {
+		notice.PinnedAt = sql.NullTime{Valid: false}
+	}
 	// Update to DB
 	if ginerr := models.DBSave(notice); ginerr != nil {
 		c.Error(ginerr)

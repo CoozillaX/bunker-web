@@ -12,8 +12,9 @@ import (
 )
 
 type CreateRequest struct {
-	Title   string `json:"title" binding:"min=1"`
-	Content string `json:"content" binding:"min=1"`
+	Title    string `json:"title" binding:"min=1"`
+	Content  string `json:"content" binding:"min=1"`
+	IsPinned bool   `json:"is_pinned"`
 }
 
 func (*Notice) Create(c *gin.Context) {
@@ -29,7 +30,7 @@ func (*Notice) Create(c *gin.Context) {
 		return
 	}
 	// Create announcement
-	if ginerr := announcement.Create(usr, req.Title, req.Content); ginerr != nil {
+	if ginerr := announcement.Create(usr, req.Title, req.Content, req.IsPinned); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}
