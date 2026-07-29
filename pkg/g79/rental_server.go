@@ -397,10 +397,6 @@ func CreateRentalServerBackup(gu *g79.G79User, name string, backupSlot int, back
 	// 2. Get entity id by name
 	for _, serverInfo := range serverInfos {
 		if serverInfo.Name == name {
-			// Check status
-			if serverInfo.Status != RentalServerStatusStopped {
-				return giner.NewPublicGinError("请关闭服务器后再进行备份")
-			}
 			// Create backup
 			reqBody, _ := json.Marshal(map[string]any{
 				"world_id":    serverInfo.WorldID,
