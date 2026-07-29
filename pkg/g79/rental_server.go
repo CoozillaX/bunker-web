@@ -353,11 +353,11 @@ func SetRentalServerVisibility(gu *g79.G79User, name string, visibility int) *gi
 }
 
 type RentalServerBackupInfo struct {
-	BackupID     int    `json:"backup_id"`
-	BackupTS     int64  `json:"backup_ts"`
-	BackupName   string `json:"backup_name"`
-	BackupSize   int    `json:"backup_size"`
-	IsProcessing bool   `json:"is_processing"`
+	BackupID     int    `json:"backup_id"`     // 备份槽位 ID
+	BackupTS     int64  `json:"backup_ts"`     // 备份时间戳
+	BackupName   string `json:"backup_name"`   // 备份名称
+	BackupSize   int    `json:"backup_size"`   // 备份大小
+	IsProcessing bool   `json:"is_processing"` // 是否正在处理
 }
 
 func QueryRentalServerBackupInfo(gu *g79.G79User, worldID, serverID string) ([]*RentalServerBackupInfo, *gin.Error) {
@@ -413,29 +413,23 @@ func CreateRentalServerBackup(gu *g79.G79User, name string, backupSlot int, back
 			if protocolErr != nil {
 				return giner.NewGinErrorFromProtocolErr(protocolErr)
 			}
-			// Polling backup status
-			for {
-				time.Sleep(time.Second)
-				backupInfoList, ginerr := QueryRentalServerBackupInfo(gu, serverInfo.WorldID, serverInfo.EntityID)
-				if ginerr != nil {
-					return ginerr
-				}
-				// Check backup status
-				isProcessing := false
-				for _, backupInfo := range backupInfoList {
-					if backupInfo.BackupID == backupSlot {
-						isProcessing = backupInfo.IsProcessing
-						break
-					}
-				}
-				if !isProcessing {
-					return nil
-				}
-			}
-
+			return nil
 		}
 	}
 	return giner.NewPublicGinError("未查找到服务器")
+}
+
+func QueryRentalServerBackup(gu *g79.G79User, name string) ([]*RentalServerBackupInfo, *gin.Error) {
+	serverInfos, ginerr := QueryMyRentalServers(gu)
+	if ginerr != nil {
+		return nil, ginerr
+	}
+	for _, serverInfo := range serverInfos {
+		if serverInfo.Name == name {
+			return QueryRentalServerBackupInfo(gu, serverInfo.WorldID, serverInfo.EntityID)
+		}
+	}
+	return nil, giner.NewPublicGinError("未查找到服务器")
 }
 
 func QueryRentalServerPlayerList(gu *g79.G79User, status *int, serverID string, orderType int, isOnline *bool, length *int, offset int) ([]map[string]any, *gin.Error) {

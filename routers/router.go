@@ -104,6 +104,8 @@ func RegisterOpenAPI(router *gin.Engine) {
 				rentalServerGroup.POST("/ban_player", routers.OpenAPI.Owner.RentalServer.BanPlayer)
 				// Create backup
 				rentalServerGroup.POST("/create_backup", routers.OpenAPI.Owner.RentalServer.CreateBackup)
+				// Query backup
+				rentalServerGroup.POST("/query_backup", routers.OpenAPI.Owner.RentalServer.QueryBackup)
 				// Kick rental server player
 				rentalServerGroup.POST("/kick_player", routers.OpenAPI.Owner.RentalServer.KickPlayer)
 				// Set level limitation

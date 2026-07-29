@@ -288,7 +288,7 @@
         },
         "/openapi/owner/rental_server/create_backup": {
             "post": {
-                "description": "为自己的服务器创建备份, 需要提供 API Key 且绑定游戏账号\n注意: 此 API 会尝试进行游戏登录 (Owner)",
+                "description": "为自己的服务器创建备份, 需要提供 API Key 且绑定游戏账号\n备份为异步任务, 此接口会在创建任务成功后返回成功, 后续可通过 query_backup 查询处理状态\n注意: 此 API 会尝试进行游戏登录 (Owner)",
                 "consumes": [
                     "application/json"
                 ],
@@ -363,6 +363,47 @@
                         "description": "成功时返回",
                         "schema": {
                             "$ref": "#/definitions/giner.BasicResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi/owner/rental_server/query_backup": {
+            "post": {
+                "description": "查询服务器备份及处理状态, 需要提供 API Key 且绑定游戏账号\n注意: 此 API 会尝试进行游戏登录 (Owner)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "租赁服 (管理类)"
+                ],
+                "summary": "查询服务器备份",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "此处需要填写 API Key, 可以从用户菜单获取",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求时需要在 Body 携带以下查询参数",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rental_server.QueryBackupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时返回",
+                        "schema": {
+                            "$ref": "#/definitions/rental_server.QueryBackupResponse"
                         }
                     }
                 }
@@ -625,6 +666,31 @@
                 "username": {
                     "description": "用户名",
                     "type": "string"
+                }
+            }
+        },
+        "g79.RentalServerBackupInfo": {
+            "type": "object",
+            "properties": {
+                "backup_id": {
+                    "description": "备份槽位 ID",
+                    "type": "integer"
+                },
+                "backup_name": {
+                    "description": "备份名称",
+                    "type": "string"
+                },
+                "backup_size": {
+                    "description": "备份大小",
+                    "type": "integer"
+                },
+                "backup_ts": {
+                    "description": "备份时间戳",
+                    "type": "integer"
+                },
+                "is_processing": {
+                    "description": "是否正在处理",
+                    "type": "boolean"
                 }
             }
         },
@@ -949,6 +1015,7 @@
             "type": "object",
             "properties": {
                 "data": {
+                    "description": "玩家数据列表",
                     "type": "array",
                     "items": {
                         "type": "object",
@@ -977,6 +1044,36 @@
                     "description": "目标玩家的启动器UID",
                     "type": "integer",
                     "minimum": 1
+                }
+            }
+        },
+        "rental_server.QueryBackupRequest": {
+            "type": "object",
+            "properties": {
+                "server_code": {
+                    "description": "服务器号",
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "rental_server.QueryBackupResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "服务器备份列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/g79.RentalServerBackupInfo"
+                    }
+                },
+                "message": {
+                    "description": "成功或失败原因",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "是否成功",
+                    "type": "boolean"
                 }
             }
         },

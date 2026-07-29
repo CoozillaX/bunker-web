@@ -20,7 +20,7 @@ type GetPlayerListRequest struct {
 
 type GetPlayerListResponse struct {
 	giner.BasicResponse
-	Data []map[string]any `json:"data"`
+	Data []map[string]any `json:"data"` // 玩家数据列表
 }
 
 // GetRentalServerPlayerList godoc

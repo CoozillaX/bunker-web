@@ -14,6 +14,24 @@ definitions:
         description: 用户名
         type: string
     type: object
+  g79.RentalServerBackupInfo:
+    properties:
+      backup_id:
+        description: 备份槽位 ID
+        type: integer
+      backup_name:
+        description: 备份名称
+        type: string
+      backup_size:
+        description: 备份大小
+        type: integer
+      backup_ts:
+        description: 备份时间戳
+        type: integer
+      is_processing:
+        description: 是否正在处理
+        type: boolean
+    type: object
   g79.RentalServerInfo:
     properties:
       capacity:
@@ -243,6 +261,7 @@ definitions:
   rental_server.GetPlayerListResponse:
     properties:
       data:
+        description: 玩家数据列表
         items:
           additionalProperties: {}
           type: object
@@ -264,6 +283,27 @@ definitions:
         description: 目标玩家的启动器UID
         minimum: 1
         type: integer
+    type: object
+  rental_server.QueryBackupRequest:
+    properties:
+      server_code:
+        description: 服务器号
+        minLength: 1
+        type: string
+    type: object
+  rental_server.QueryBackupResponse:
+    properties:
+      data:
+        description: 服务器备份列表
+        items:
+          $ref: '#/definitions/g79.RentalServerBackupInfo'
+        type: array
+      message:
+        description: 成功或失败原因
+        type: string
+      success:
+        description: 是否成功
+        type: boolean
     type: object
   rental_server.SearchRequest:
     properties:
@@ -557,6 +597,7 @@ paths:
       - application/json
       description: |-
         为自己的服务器创建备份, 需要提供 API Key 且绑定游戏账号
+        备份为异步任务, 此接口会在创建任务成功后返回成功, 后续可通过 query_backup 查询处理状态
         注意: 此 API 会尝试进行游戏登录 (Owner)
       parameters:
       - description: 此处需要填写 API Key, 可以从用户菜单获取
@@ -607,6 +648,35 @@ paths:
           schema:
             $ref: '#/definitions/giner.BasicResponse'
       summary: 踢出租赁服玩家
+      tags:
+      - 租赁服 (管理类)
+  /openapi/owner/rental_server/query_backup:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        查询服务器备份及处理状态, 需要提供 API Key 且绑定游戏账号
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 请求时需要在 Body 携带以下查询参数
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/rental_server.QueryBackupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/rental_server.QueryBackupResponse'
+      summary: 查询服务器备份
       tags:
       - 租赁服 (管理类)
   /openapi/owner/rental_server/set_level_limitation:
