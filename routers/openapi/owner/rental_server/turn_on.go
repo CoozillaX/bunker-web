@@ -19,7 +19,7 @@ type TurnOnRequest struct {
 //	@Summary		开启服务器
 //	@Description	开启自己的服务器, 需要提供 API Key 且绑定游戏账号
 //	@Description	注意: 此 API 会尝试进行游戏登录 (Owner)
-//	@Tags			租赁服 (管理类)
+//	@Tags			租赁服
 //	@Accept			json
 //	@Produce		json
 //	@Param			Authorization	header		string					true	"此处需要填写 API Key, 可以从用户菜单获取"

@@ -107,7 +107,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "租赁服 (查询类)"
+                    "租赁服"
                 ],
                 "summary": "获取租赁服玩家列表",
                 "parameters": [
@@ -148,7 +148,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "租赁服 (查询类)"
+                    "租赁服"
                 ],
                 "summary": "查询租赁服信息",
                 "parameters": [
@@ -264,7 +264,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "租赁服 (管理类)"
+                    "租赁服"
                 ],
                 "summary": "更新租赁服玩家黑名单状态",
                 "parameters": [
@@ -305,7 +305,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "租赁服 (管理类)"
+                    "租赁服"
                 ],
                 "summary": "创建服务器备份",
                 "parameters": [
@@ -346,7 +346,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "租赁服 (管理类)"
+                    "租赁服"
                 ],
                 "summary": "踢出租赁服玩家",
                 "parameters": [
@@ -387,7 +387,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "租赁服 (管理类)"
+                    "租赁服"
                 ],
                 "summary": "查询服务器备份",
                 "parameters": [
@@ -428,7 +428,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "租赁服 (管理类)"
+                    "租赁服"
                 ],
                 "summary": "设置服务器等级限制",
                 "parameters": [
@@ -469,7 +469,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "租赁服 (管理类)"
+                    "租赁服"
                 ],
                 "summary": "设置服务器密码",
                 "parameters": [
@@ -510,7 +510,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "租赁服 (管理类)"
+                    "租赁服"
                 ],
                 "summary": "设置服务器公开性",
                 "parameters": [
@@ -551,7 +551,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "租赁服 (管理类)"
+                    "租赁服"
                 ],
                 "summary": "关闭服务器",
                 "parameters": [
@@ -592,7 +592,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "租赁服 (管理类)"
+                    "租赁服"
                 ],
                 "summary": "开启服务器",
                 "parameters": [

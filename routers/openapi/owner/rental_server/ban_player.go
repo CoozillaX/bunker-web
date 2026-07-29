@@ -21,7 +21,7 @@ type BanPlayerRequest struct {
 //	@Summary		更新租赁服玩家黑名单状态
 //	@Description	更新租赁服玩家黑名单状态, 游戏账号需要拥有指定的租赁服, 且需要提供 API key
 //	@Description	注意: 此 API 会尝试进行游戏登录 (Owner)
-//	@Tags			租赁服 (管理类)
+//	@Tags			租赁服
 //	@Accept			json
 //	@Produce		json
 //	@Param			Authorization	header		string					true	"此处需要填写 API Key, 可以从用户菜单获取"

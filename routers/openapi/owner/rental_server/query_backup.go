@@ -23,7 +23,7 @@ type QueryBackupResponse struct {
 //	@Summary		查询服务器备份
 //	@Description	查询服务器备份及处理状态, 需要提供 API Key 且绑定游戏账号
 //	@Description	注意: 此 API 会尝试进行游戏登录 (Owner)
-//	@Tags			租赁服 (管理类)
+//	@Tags			租赁服
 //	@Accept			json
 //	@Produce		json
 //	@Param			Authorization	header		string				true	"此处需要填写 API Key, 可以从用户菜单获取"

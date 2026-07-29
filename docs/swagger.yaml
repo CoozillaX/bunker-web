@@ -474,7 +474,7 @@ paths:
             $ref: '#/definitions/rental_server.GetPlayerListResponse'
       summary: 获取租赁服玩家列表
       tags:
-      - 租赁服 (查询类)
+      - 租赁服
   /openapi/helper/rental_server/search:
     post:
       consumes:
@@ -503,7 +503,7 @@ paths:
             $ref: '#/definitions/rental_server.SearchResponse'
       summary: 查询租赁服信息
       tags:
-      - 租赁服 (查询类)
+      - 租赁服
   /openapi/helper/search_user:
     post:
       consumes:
@@ -590,7 +590,7 @@ paths:
             $ref: '#/definitions/giner.BasicResponse'
       summary: 更新租赁服玩家黑名单状态
       tags:
-      - 租赁服 (管理类)
+      - 租赁服
   /openapi/owner/rental_server/create_backup:
     post:
       consumes:
@@ -620,7 +620,7 @@ paths:
             $ref: '#/definitions/giner.BasicResponse'
       summary: 创建服务器备份
       tags:
-      - 租赁服 (管理类)
+      - 租赁服
   /openapi/owner/rental_server/kick_player:
     post:
       consumes:
@@ -649,7 +649,7 @@ paths:
             $ref: '#/definitions/giner.BasicResponse'
       summary: 踢出租赁服玩家
       tags:
-      - 租赁服 (管理类)
+      - 租赁服
   /openapi/owner/rental_server/query_backup:
     post:
       consumes:
@@ -678,7 +678,7 @@ paths:
             $ref: '#/definitions/rental_server.QueryBackupResponse'
       summary: 查询服务器备份
       tags:
-      - 租赁服 (管理类)
+      - 租赁服
   /openapi/owner/rental_server/set_level_limitation:
     post:
       consumes:
@@ -707,7 +707,7 @@ paths:
             $ref: '#/definitions/giner.BasicResponse'
       summary: 设置服务器等级限制
       tags:
-      - 租赁服 (管理类)
+      - 租赁服
   /openapi/owner/rental_server/set_password:
     post:
       consumes:
@@ -736,7 +736,7 @@ paths:
             $ref: '#/definitions/giner.BasicResponse'
       summary: 设置服务器密码
       tags:
-      - 租赁服 (管理类)
+      - 租赁服
   /openapi/owner/rental_server/set_visibility:
     post:
       consumes:
@@ -765,7 +765,7 @@ paths:
             $ref: '#/definitions/giner.BasicResponse'
       summary: 设置服务器公开性
       tags:
-      - 租赁服 (管理类)
+      - 租赁服
   /openapi/owner/rental_server/turn_off:
     post:
       consumes:
@@ -794,7 +794,7 @@ paths:
             $ref: '#/definitions/giner.BasicResponse'
       summary: 关闭服务器
       tags:
-      - 租赁服 (管理类)
+      - 租赁服
   /openapi/owner/rental_server/turn_on:
     post:
       consumes:
@@ -823,7 +823,7 @@ paths:
             $ref: '#/definitions/giner.BasicResponse'
       summary: 开启服务器
       tags:
-      - 租赁服 (管理类)
+      - 租赁服
   /openapi/user/get_status:
     get:
       consumes:

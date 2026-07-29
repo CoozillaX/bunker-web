@@ -21,7 +21,7 @@ type CreateBackupRequest struct {
 //	@Description	为自己的服务器创建备份, 需要提供 API Key 且绑定游戏账号
 //	@Description	备份为异步任务, 此接口会在创建任务成功后返回成功, 后续可通过 query_backup 查询处理状态
 //	@Description	注意: 此 API 会尝试进行游戏登录 (Owner)
-//	@Tags			租赁服 (管理类)
+//	@Tags			租赁服
 //	@Accept			json
 //	@Produce		json
 //	@Param			Authorization	header		string					true	"此处需要填写 API Key, 可以从用户菜单获取"

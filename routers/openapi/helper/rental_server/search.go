@@ -23,7 +23,7 @@ type SearchResponse struct {
 //	@Summary		查询租赁服信息
 //	@Description	查询租赁服基础信息, 需要提供 API key
 //	@Description	注意: 此 API 会尝试进行游戏登录 (Helper)
-//	@Tags			租赁服 (查询类)
+//	@Tags			租赁服
 //	@Accept			json
 //	@Produce		json
 //	@Param			Authorization	header		string			true	"此处需要填写 API Key, 可以从用户菜单获取"
