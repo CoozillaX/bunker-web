@@ -14,6 +14,15 @@ definitions:
         description: 用户名
         type: string
     type: object
+  g79.RandomName:
+    properties:
+      name:
+        description: 随机昵称
+        type: string
+      type:
+        description: 昵称类型, 0 表示账号原有昵称
+        type: integer
+    type: object
   g79.RentalServerBackupInfo:
     properties:
       backup_id:
@@ -137,6 +146,20 @@ definitions:
         items:
           additionalProperties: {}
           type: object
+        type: array
+      message:
+        description: 成功或失败原因
+        type: string
+      success:
+        description: 是否成功
+        type: boolean
+    type: object
+  other.RandomNameResponse:
+    properties:
+      data:
+        description: 随机昵称候选列表
+        items:
+          $ref: '#/definitions/g79.RandomName'
         type: array
       message:
         description: 成功或失败原因
@@ -533,6 +556,27 @@ paths:
       summary: 查询玩家
       tags:
       - 玩家
+  /openapi/other/random_name:
+    post:
+      description: |-
+        获取游戏生成的随机昵称候选列表, 需要提供 API Key 并创建辅助用户
+        注意: 此 API 会尝试进行游戏登录 (Helper)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/other.RandomNameResponse'
+      summary: 获取随机昵称
+      tags:
+      - 其他
   /openapi/other/review_text:
     post:
       consumes:

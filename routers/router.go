@@ -67,6 +67,13 @@ func RegisterOpenAPI(router *gin.Engine) {
 		// Session check
 		openApiGroup.Use(middlewares.OpenAPIKeyHandler())
 
+		// Other APIs which require an API key
+		authorizedOtherGroup := openApiGroup.Group("/other")
+		{
+			// Get random names
+			authorizedOtherGroup.POST("/random_name", routers.OpenAPI.Other.RandomName)
+		}
+
 		// User
 		userGroupWithAuth := openApiGroup.Group("/user")
 		// User

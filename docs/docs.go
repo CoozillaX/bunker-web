@@ -220,6 +220,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/openapi/other/random_name": {
+            "post": {
+                "description": "获取游戏生成的随机昵称候选列表, 需要提供 API Key 并创建辅助用户\n注意: 此 API 会尝试进行游戏登录 (Helper)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "其他"
+                ],
+                "summary": "获取随机昵称",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "此处需要填写 API Key, 可以从用户菜单获取",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功时返回",
+                        "schema": {
+                            "$ref": "#/definitions/other.RandomNameResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/openapi/other/review_text": {
             "post": {
                 "description": "检查文本中是否包含敏感词, 无需提供API key, 敏感词库每小时更新一次\u003cbr\u003e\n以下为额外的字段说明: \u003cbr\u003e\nlevel: 默认使用 0, 少部分表达式会使用此字段\u003cbr\u003e\nchannel: 在不同的场景下此值会不一样, 部分值及其说明如下\u003cbr\u003e\n- item_comment: 默认情况下使用此channel\u003cbr\u003e\n- check_long_numbers: 需要额外检查文本是否包含长数字时使用此channel\u003cbr\u003e\n- World: 文本来源为世界聊天时使用此channel\u003cbr\u003e",
@@ -678,6 +707,19 @@ const docTemplate = `{
                 }
             }
         },
+        "g79.RandomName": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "随机昵称",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "昵称类型, 0 表示账号原有昵称",
+                    "type": "integer"
+                }
+            }
+        },
         "g79.RentalServerBackupInfo": {
             "type": "object",
             "properties": {
@@ -856,6 +898,26 @@ const docTemplate = `{
                     "items": {
                         "type": "object",
                         "additionalProperties": {}
+                    }
+                },
+                "message": {
+                    "description": "成功或失败原因",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "是否成功",
+                    "type": "boolean"
+                }
+            }
+        },
+        "other.RandomNameResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "随机昵称候选列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/g79.RandomName"
                     }
                 },
                 "message": {
