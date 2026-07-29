@@ -40,7 +40,7 @@ func (*Helper) GetStatus(c *gin.Context) {
 	// We don't need to login again if x19 user exists in session
 	defer models.DBSave(usr.HelperMpayUser)
 	// Relogin
-	gu, ginerr := g79.HandleG79Login(usr.HelperMpayUser)
+	gu, ginerr := g79.GetHelperG79User(c)
 	if ginerr != nil {
 		respData := &GetStatusResponseData{
 			Set: true,

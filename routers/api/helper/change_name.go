@@ -27,19 +27,13 @@ func (*Helper) ChangeName(c *gin.Context) {
 		c.Error(giner.NewPublicGinError("无效参数"))
 		return
 	}
-	// Check helper if exist
-	if usr.HelperMpayUser == nil || usr.HelperMpayUser.GetToken() == "" {
-		c.Error(giner.NewPublicGinError("未创建辅助用户"))
-		return
-	}
-	// Store to DB
-	defer models.DBSave(usr.HelperMpayUser)
-	// Get g79 user
-	gu, ginerr := g79.HandleG79Login(usr.HelperMpayUser)
+	gu, ginerr := g79.GetHelperG79User(c)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return
 	}
+	// Store to DB
+	defer models.DBSave(usr.HelperMpayUser)
 	// Change name
 	if ginerr := g79.ChangeUserName(gu, req.UserName); ginerr != nil {
 		c.Error(ginerr)

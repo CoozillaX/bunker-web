@@ -16,19 +16,13 @@ func (*Owner) GetMailReward(c *gin.Context) {
 	session, _ := sessions.GetSessionByBearer(bearer.(string))
 	u, _ := session.Load("usr")
 	usr := u.(*models.User)
-	// Check owner if exist
-	if usr.OwnerMpayUser == nil || usr.OwnerMpayUser.GetToken() == "" {
-		c.Error(giner.NewPublicGinError("未创建游戏账号"))
-		return
-	}
-	// Store to DB
-	defer models.DBSave(usr.OwnerMpayUser)
-	// Relogin
-	gu, ginerr := g79.HandleG79Login(usr.OwnerMpayUser)
+	gu, ginerr := g79.GetOwnerG79User(c)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return
 	}
+	// Store to DB
+	defer models.DBSave(usr.OwnerMpayUser)
 	// Get all mails
 	mailList, ginerr := g79.GetGeneralMailList(gu)
 	if ginerr != nil {

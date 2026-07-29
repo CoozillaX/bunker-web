@@ -32,7 +32,7 @@ func (*User) BindGameId(c *gin.Context) {
 		return
 	}
 	// g79 login
-	gu, ginerr := g79.HandleG79Login(usr.OwnerMpayUser)
+	gu, ginerr := g79.GetOwnerG79User(c)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

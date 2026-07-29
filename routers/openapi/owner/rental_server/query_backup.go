@@ -1,7 +1,6 @@
 package rental_server
 
 import (
-	"bunker-web/models"
 	"bunker-web/pkg/g79"
 	"bunker-web/pkg/giner"
 	"net/http"
@@ -37,14 +36,7 @@ func (*RentalServer) QueryBackup(c *gin.Context) {
 		return
 	}
 
-	u, _ := c.Get("usr")
-	usr := u.(*models.User)
-	if usr.OwnerMpayUser == nil || usr.OwnerMpayUser.GetToken() == "" {
-		c.Error(giner.NewPublicGinError("请先绑定游戏账号"))
-		return
-	}
-
-	gu, ginerr := g79.HandleG79Login(usr.OwnerMpayUser)
+	gu, ginerr := g79.GetOwnerG79User(c)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

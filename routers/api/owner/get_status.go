@@ -39,7 +39,7 @@ func (*Owner) GetStatus(c *gin.Context) {
 	// We don't need to login again if x19 user exists in session
 	defer models.DBSave(usr.OwnerMpayUser)
 	// Relogin
-	gu, ginerr := g79.HandleG79Login(usr.OwnerMpayUser)
+	gu, ginerr := g79.GetOwnerG79User(c)
 	if ginerr != nil {
 		c.JSON(http.StatusOK, giner.MakeHTTPResponse(false).
 			SetMessage(giner.GetPublicErrorString(ginerr)).

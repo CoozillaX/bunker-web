@@ -4,6 +4,7 @@ import (
 	"bunker-core/protocol/g79"
 	"bunker-web/models"
 	"bunker-web/pkg/giner"
+	"bunker-web/pkg/sessions"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -64,4 +65,45 @@ func HandleG79Login(mu models.MpayUser) (*g79.G79User, *gin.Error) {
 		ttl: defaultTTL,
 	})
 	return gu, nil
+}
+
+func GetHelperG79User(c *gin.Context) (*g79.G79User, *gin.Error) {
+	usr, ok := getUserFromContext(c)
+	if !ok || usr.HelperMpayUser == nil || usr.HelperMpayUser.GetToken() == "" {
+		return nil, giner.NewPublicGinError("未创建辅助用户")
+	}
+	return HandleG79Login(usr.HelperMpayUser)
+}
+
+func GetOwnerG79User(c *gin.Context) (*g79.G79User, *gin.Error) {
+	usr, ok := getUserFromContext(c)
+	if !ok || usr.OwnerMpayUser == nil || usr.OwnerMpayUser.GetToken() == "" {
+		return nil, giner.NewPublicGinError("请先绑定游戏账号")
+	}
+	return HandleG79Login(usr.OwnerMpayUser)
+}
+
+func getUserFromContext(c *gin.Context) (*models.User, bool) {
+	if u, exists := c.Get("usr"); exists {
+		usr, ok := u.(*models.User)
+		return usr, ok
+	}
+	bearer, exists := c.Get("bearer")
+	if !exists {
+		return nil, false
+	}
+	bearerString, ok := bearer.(string)
+	if !ok {
+		return nil, false
+	}
+	session, ok := sessions.GetSessionByBearer(bearerString)
+	if !ok {
+		return nil, false
+	}
+	u, exists := session.Load("usr")
+	if !exists {
+		return nil, false
+	}
+	usr, ok := u.(*models.User)
+	return usr, ok
 }

@@ -22,26 +22,27 @@ const (
 )
 
 type RentalServerInfo struct {
-	EntityID    string `json:"entity_id"`
-	Name        string `json:"name"`
-	OwnerID     int    `json:"owner_id"`
-	Visibility  int    `json:"visibility"`
-	Status      int    `json:"status"`
-	IconIndex   int    `json:"icon_index"`
-	Capacity    int    `json:"capacity"`
-	MCVersion   string `json:"mc_version"`
-	PlayerCount int    `json:"player_count"`
-	LikeNum     int    `json:"like_num"`
-	ServerType  string `json:"server_type"`
-	Offset      any    `json:"offset"` // unknown type
-	HasPwd      string `json:"has_pwd"`
-	ImageUrl    string `json:"image_url"`
-	WorldID     string `json:"world_id"`
-	MinLevel    string `json:"min_level"`
-	PVP         bool   `json:"pvp"`
-	ServerName  string `json:"server_name"`
-	IPAddress   string `json:"ip_address,omitempty"`
-	ChainInfo   string `json:"chainInfo,omitempty"`
+	EntityID     string `json:"entity_id"`
+	Name         string `json:"name"`
+	OwnerID      int    `json:"owner_id"`
+	Visibility   int    `json:"visibility"`
+	Status       int    `json:"status"`
+	IconIndex    int    `json:"icon_index"`
+	Capacity     int    `json:"capacity"`
+	MCVersion    string `json:"mc_version"`
+	PlayerCount  int    `json:"player_count"`
+	LikeNum      int    `json:"like_num"`
+	ServerType   string `json:"server_type"`
+	Offset       any    `json:"offset"` // unknown type
+	HasPwd       string `json:"has_pwd"`
+	ImageUrl     string `json:"image_url"`
+	WorldID      string `json:"world_id"`
+	MinLevel     string `json:"min_level"`
+	PVP          bool   `json:"pvp"`
+	ServerName   string `json:"server_name"`
+	BriefSummary string `json:"brief_summary"`
+	IPAddress    string `json:"ip_address,omitempty"`
+	ChainInfo    string `json:"chainInfo,omitempty"`
 }
 
 func QueryRentalServer(gu *g79.G79User, name string) (*RentalServerInfo, *gin.Error) {

@@ -26,19 +26,13 @@ func (*Owner) UseGiftCode(c *gin.Context) {
 		c.Error(giner.NewPublicGinError("无效参数"))
 		return
 	}
-	// Check owner if exist
-	if usr.OwnerMpayUser == nil || usr.OwnerMpayUser.GetToken() == "" {
-		c.Error(giner.NewPublicGinError("未创建游戏账号"))
-		return
-	}
-	// Store to DB
-	defer models.DBSave(usr.OwnerMpayUser)
-	// Relogin
-	gu, ginerr := g79.HandleG79Login(usr.OwnerMpayUser)
+	gu, ginerr := g79.GetOwnerG79User(c)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return
 	}
+	// Store to DB
+	defer models.DBSave(usr.OwnerMpayUser)
 	// Use gift code
 	if ginerr := g79.UseGiftCode(gu, req.Code); ginerr != nil {
 		c.Error(ginerr)

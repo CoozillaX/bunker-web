@@ -26,19 +26,13 @@ func (*Helper) SubmitRealmsApplication(c *gin.Context) {
 		c.Error(giner.NewPublicGinError("无效参数"))
 		return
 	}
-	// Check helper if exist
-	if usr.HelperMpayUser == nil || usr.HelperMpayUser.GetToken() == "" {
-		c.Error(giner.NewPublicGinError("未创建辅助用户"))
-		return
-	}
-	// Store to DB
-	defer models.DBSave(usr.HelperMpayUser)
-	// Get g79 user
-	gu, ginerr := g79.HandleG79Login(usr.HelperMpayUser)
+	gu, ginerr := g79.GetHelperG79User(c)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return
 	}
+	// Store to DB
+	defer models.DBSave(usr.HelperMpayUser)
 	// Submit realms server application
 	if ginerr := gu.SubmitRealmsServerApplication(req.Code); ginerr != nil {
 		c.Error(giner.NewPublicGinError(ginerr.Error()))

@@ -67,13 +67,6 @@ func RegisterOpenAPI(router *gin.Engine) {
 		// Session check
 		openApiGroup.Use(middlewares.OpenAPIKeyHandler())
 
-		// Other APIs which require an API key
-		authorizedOtherGroup := openApiGroup.Group("/other")
-		{
-			// Get random names
-			authorizedOtherGroup.POST("/random_name", routers.OpenAPI.Other.RandomName)
-		}
-
 		// User
 		userGroupWithAuth := openApiGroup.Group("/user")
 		// User
@@ -85,6 +78,8 @@ func RegisterOpenAPI(router *gin.Engine) {
 		// Helper
 		helperGroup := openApiGroup.Group("/helper")
 		{
+			// Get random names (Other)
+			helperGroup.POST("/random_name", routers.OpenAPI.Other.RandomName)
 			// Get user details
 			helperGroup.POST("/get_user_details", routers.OpenAPI.Helper.GetUserDetails)
 			// Get user state
@@ -125,6 +120,50 @@ func RegisterOpenAPI(router *gin.Engine) {
 				rentalServerGroup.POST("/turn_off", routers.OpenAPI.Owner.RentalServer.TurnOff)
 				// Turn on rental server
 				rentalServerGroup.POST("/turn_on", routers.OpenAPI.Owner.RentalServer.TurnOn)
+			}
+			// Realms server
+			realmsServerGroup := ownerGroup.Group("/realms_server")
+			{
+				// Search realms server
+				realmsServerGroup.POST("/search", routers.OpenAPI.Owner.RealmsServer.Search)
+				// Get realms server online players
+				realmsServerGroup.POST("/get_online_players", routers.OpenAPI.Owner.RealmsServer.GetOnlinePlayers)
+				// Get realms server blocklist
+				realmsServerGroup.POST("/blocklist_query", routers.OpenAPI.Owner.RealmsServer.BlocklistQuery)
+				// Add player to realms server blocklist
+				realmsServerGroup.POST("/blocklist_add", routers.OpenAPI.Owner.RealmsServer.BlocklistAdd)
+				// Remove player from realms server blocklist
+				realmsServerGroup.POST("/blocklist_remove", routers.OpenAPI.Owner.RealmsServer.BlocklistRemove)
+				// Query realms server invite codes
+				realmsServerGroup.POST("/invite_code_query", routers.OpenAPI.Owner.RealmsServer.InviteCodeQuery)
+				// Generate realms server invite code
+				realmsServerGroup.POST("/invite_code_generate", routers.OpenAPI.Owner.RealmsServer.InviteCodeGenerate)
+				// Remove realms server invite code
+				realmsServerGroup.POST("/invite_code_remove", routers.OpenAPI.Owner.RealmsServer.InviteCodeRemove)
+				// Update realms server invite code
+				realmsServerGroup.POST("/invite_code_update", routers.OpenAPI.Owner.RealmsServer.InviteCodeUpdate)
+				// Query realms server members
+				realmsServerGroup.POST("/member_query", routers.OpenAPI.Owner.RealmsServer.MemberQuery)
+				// Remove realms server member
+				realmsServerGroup.POST("/member_remove", routers.OpenAPI.Owner.RealmsServer.MemberRemove)
+				// Set realms server member permission
+				realmsServerGroup.POST("/member_set_permission", routers.OpenAPI.Owner.RealmsServer.MemberSetPermission)
+				// Invite realms server member
+				realmsServerGroup.POST("/member_invite", routers.OpenAPI.Owner.RealmsServer.MemberInvite)
+				// Query realms server member invitations
+				realmsServerGroup.POST("/member_invite_query", routers.OpenAPI.Owner.RealmsServer.MemberInviteQuery)
+				// Update realms server member invitation
+				realmsServerGroup.POST("/member_invite_update", routers.OpenAPI.Owner.RealmsServer.MemberInviteUpdate)
+				// Remove realms server member invitation
+				realmsServerGroup.POST("/member_invite_remove", routers.OpenAPI.Owner.RealmsServer.MemberInviteRemove)
+				// Query realms server applications
+				realmsServerGroup.POST("/application_query", routers.OpenAPI.Owner.RealmsServer.ApplicationQuery)
+				// Approve realms server applications
+				realmsServerGroup.POST("/application_approve", routers.OpenAPI.Owner.RealmsServer.ApplicationApprove)
+				// Turn on realms server
+				realmsServerGroup.POST("/turn_on", routers.OpenAPI.Owner.RealmsServer.TurnOn)
+				// Turn off realms server
+				realmsServerGroup.POST("/turn_off", routers.OpenAPI.Owner.RealmsServer.TurnOff)
 			}
 		}
 	}

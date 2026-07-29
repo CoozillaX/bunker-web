@@ -1,7 +1,6 @@
 package other
 
 import (
-	"bunker-web/models"
 	"bunker-web/pkg/g79"
 	"bunker-web/pkg/giner"
 	"net/http"
@@ -23,16 +22,9 @@ type RandomNameResponse struct {
 //	@Produce		json
 //	@Param			Authorization	header		string				true	"此处需要填写 API Key, 可以从用户菜单获取"
 //	@Success		200				{object}	RandomNameResponse	"成功时返回"
-//	@Router			/openapi/other/random_name [post]
+//	@Router			/openapi/helper/random_name [post]
 func (*Other) RandomName(c *gin.Context) {
-	u, _ := c.Get("usr")
-	usr := u.(*models.User)
-	if usr.HelperMpayUser == nil || usr.HelperMpayUser.GetToken() == "" {
-		c.Error(giner.NewPublicGinError("未创建辅助用户"))
-		return
-	}
-
-	gu, ginerr := g79.HandleG79Login(usr.HelperMpayUser)
+	gu, ginerr := g79.GetHelperG79User(c)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

@@ -23,6 +23,36 @@ definitions:
         description: 昵称类型, 0 表示账号原有昵称
         type: integer
     type: object
+  g79.RealmsServerBlocklistPlayer:
+    properties:
+      create_time:
+        description: 加入黑名单时间
+        type: integer
+      head:
+        description: 玩家头像地址
+        type: string
+      nickname:
+        description: 玩家昵称
+        type: string
+      uid:
+        description: 玩家 UID
+        type: integer
+    type: object
+  g79.RealmsServerInviteCode:
+    properties:
+      code:
+        description: 邀请码
+        type: string
+      expire_time:
+        description: 过期时间
+        type: integer
+      permission:
+        description: 加入后的权限
+        type: integer
+      share_text:
+        description: 分享文案
+        type: string
+    type: object
   g79.RentalServerBackupInfo:
     properties:
       backup_id:
@@ -43,6 +73,8 @@ definitions:
     type: object
   g79.RentalServerInfo:
     properties:
+      brief_summary:
+        type: string
       capacity:
         type: integer
       chainInfo:
@@ -225,6 +257,375 @@ definitions:
         description: 是否成功
         type: boolean
     type: object
+  realms_server.ApplicationApproveItem:
+    properties:
+      application_id:
+        description: 申请 ID
+        minimum: 1
+        type: integer
+      permission:
+        description: 通过时的成员权限, 不传则使用默认权限
+        type: string
+    type: object
+  realms_server.ApplicationApproveRequest:
+    properties:
+      action:
+        description: 1=通过, 2=拒绝, 3=拉黑并拒绝
+        enum:
+        - 1
+        - 2
+        - 3
+        type: integer
+      items:
+        description: 待审批项目, 最多 20 项
+        items:
+          $ref: '#/definitions/realms_server.ApplicationApproveItem'
+        maxItems: 20
+        minItems: 1
+        type: array
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+    required:
+    - items
+    type: object
+  realms_server.ApplicationApproveResponse:
+    properties:
+      data:
+        additionalProperties: {}
+        description: 审批结果, 主要字段为 results
+        type: object
+      message:
+        description: 成功或失败原因
+        type: string
+      success:
+        description: 是否成功
+        type: boolean
+    type: object
+  realms_server.ApplicationQueryRequest:
+    properties:
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+    type: object
+  realms_server.ApplicationQueryResponse:
+    properties:
+      data:
+        additionalProperties: {}
+        description: 申请队列, 主要字段为 queue
+        type: object
+      message:
+        description: 成功或失败原因
+        type: string
+      success:
+        description: 是否成功
+        type: boolean
+    type: object
+  realms_server.BlocklistAddRequest:
+    properties:
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+      uid:
+        description: 玩家 UID
+        minLength: 1
+        type: string
+    type: object
+  realms_server.BlocklistQueryRequest:
+    properties:
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+    type: object
+  realms_server.BlocklistQueryResponse:
+    properties:
+      data:
+        description: 黑名单玩家列表
+        items:
+          $ref: '#/definitions/g79.RealmsServerBlocklistPlayer'
+        type: array
+      message:
+        description: 成功或失败原因
+        type: string
+      success:
+        description: 是否成功
+        type: boolean
+    type: object
+  realms_server.BlocklistRemoveRequest:
+    properties:
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+      uid:
+        description: 玩家 UID
+        minLength: 1
+        type: string
+    type: object
+  realms_server.GetOnlinePlayersRequest:
+    properties:
+      length:
+        description: 分页长度, 默认为 9
+        example: 9
+        maximum: 100
+        minimum: 1
+        type: integer
+      offset:
+        description: 分页偏移
+        minimum: 0
+        type: integer
+      order_type:
+        description: 排序类型 (0, 1)
+        example: 0
+        type: integer
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+    type: object
+  realms_server.GetOnlinePlayersResponse:
+    properties:
+      data:
+        description: 在线玩家列表
+        items:
+          additionalProperties: {}
+          type: object
+        type: array
+      message:
+        description: 成功或失败原因
+        type: string
+      success:
+        description: 是否成功
+        type: boolean
+    type: object
+  realms_server.InviteCodeGenerateRequest:
+    properties:
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+    type: object
+  realms_server.InviteCodeGenerateResponse:
+    properties:
+      data:
+        description: 新生成的邀请码
+        type: string
+      message:
+        description: 成功或失败原因
+        type: string
+      success:
+        description: 是否成功
+        type: boolean
+    type: object
+  realms_server.InviteCodeQueryRequest:
+    properties:
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+    type: object
+  realms_server.InviteCodeQueryResponse:
+    properties:
+      data:
+        description: 邀请码列表
+        items:
+          $ref: '#/definitions/g79.RealmsServerInviteCode'
+        type: array
+      message:
+        description: 成功或失败原因
+        type: string
+      success:
+        description: 是否成功
+        type: boolean
+    type: object
+  realms_server.InviteCodeRemoveRequest:
+    properties:
+      code:
+        description: 邀请码
+        minLength: 1
+        type: string
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+    type: object
+  realms_server.InviteCodeUpdateRequest:
+    properties:
+      code:
+        description: 邀请码
+        minLength: 1
+        type: string
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+      share_text:
+        description: 分享文案, 允许传空字符串
+        type: string
+    required:
+    - share_text
+    type: object
+  realms_server.MemberInviteQueryRequest:
+    properties:
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+    type: object
+  realms_server.MemberInviteQueryResponse:
+    properties:
+      data:
+        description: 待处理邀请列表
+        items:
+          additionalProperties: {}
+          type: object
+        type: array
+      message:
+        description: 成功或失败原因
+        type: string
+      success:
+        description: 是否成功
+        type: boolean
+    type: object
+  realms_server.MemberInviteRemoveRequest:
+    properties:
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+      uid:
+        description: 被邀请玩家 UID
+        minLength: 1
+        type: string
+    type: object
+  realms_server.MemberInviteRequest:
+    properties:
+      permission:
+        description: 加入后的权限
+        enum:
+        - "11111111"
+        - "11111100"
+        - "00000000"
+        type: string
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+      uid:
+        description: 被邀请玩家 UID
+        minLength: 1
+        type: string
+    type: object
+  realms_server.MemberInviteUpdateRequest:
+    properties:
+      permission:
+        description: 加入后的权限
+        enum:
+        - "11111111"
+        - "11111100"
+        - "00000000"
+        type: string
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+      uid:
+        description: 被邀请玩家 UID
+        minLength: 1
+        type: string
+    type: object
+  realms_server.MemberQueryRequest:
+    properties:
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+    type: object
+  realms_server.MemberQueryResponse:
+    properties:
+      data:
+        description: 成员列表
+        items:
+          additionalProperties: {}
+          type: object
+        type: array
+      message:
+        description: 成功或失败原因
+        type: string
+      success:
+        description: 是否成功
+        type: boolean
+    type: object
+  realms_server.MemberRemoveRequest:
+    properties:
+      remove_all:
+        description: 是否移除全部成员
+        type: boolean
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+      uid:
+        description: 玩家 UID, remove_all=false 时必填
+        type: string
+    type: object
+  realms_server.MemberSetPermissionRequest:
+    properties:
+      permission:
+        description: '权限: 管理员、成员、访客'
+        enum:
+        - "11111111"
+        - "11111100"
+        - "00000000"
+        type: string
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+      uid:
+        description: 玩家 UID
+        minLength: 1
+        type: string
+    type: object
+  realms_server.SearchRequest:
+    properties:
+      server_code:
+        description: '游戏内显示的山头码, 需要包含 # 前缀'
+        example: '#12345678'
+        minLength: 2
+        type: string
+    type: object
+  realms_server.SearchResponse:
+    properties:
+      data:
+        additionalProperties: {}
+        description: 山头服详细信息
+        type: object
+      message:
+        description: 成功或失败原因
+        type: string
+      success:
+        description: 是否成功
+        type: boolean
+    type: object
+  realms_server.TurnOffRequest:
+    properties:
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+    type: object
+  realms_server.TurnOnRequest:
+    properties:
+      server_id:
+        description: 山头服 SID
+        minLength: 1
+        type: string
+    type: object
   rental_server.BanPlayerRequest:
     properties:
       server_id:
@@ -272,6 +673,7 @@ definitions:
         type: integer
       order_type:
         description: 排序类型 (0, 1)
+        example: 0
         type: integer
       server_id:
         description: 租赁服实体ID
@@ -469,6 +871,27 @@ paths:
       summary: 获取玩家状态信息
       tags:
       - 玩家
+  /openapi/helper/random_name:
+    post:
+      description: |-
+        获取游戏生成的随机昵称候选列表, 需要提供 API Key 并创建辅助用户
+        注意: 此 API 会尝试进行游戏登录 (Helper)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/other.RandomNameResponse'
+      summary: 获取随机昵称
+      tags:
+      - 其他
   /openapi/helper/rental_server/get_player_list:
     post:
       consumes:
@@ -556,27 +979,6 @@ paths:
       summary: 查询玩家
       tags:
       - 玩家
-  /openapi/other/random_name:
-    post:
-      description: |-
-        获取游戏生成的随机昵称候选列表, 需要提供 API Key 并创建辅助用户
-        注意: 此 API 会尝试进行游戏登录 (Helper)
-      parameters:
-      - description: 此处需要填写 API Key, 可以从用户菜单获取
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功时返回
-          schema:
-            $ref: '#/definitions/other.RandomNameResponse'
-      summary: 获取随机昵称
-      tags:
-      - 其他
   /openapi/other/review_text:
     post:
       consumes:
@@ -606,6 +1008,591 @@ paths:
       summary: 敏感词检查
       tags:
       - 其他
+  /openapi/owner/realms_server/application_approve:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        批量审批加入申请, 每次最多 20 项
+        action: 1=通过, 2=拒绝, 3=拉黑并拒绝; permission 仅 action=1 时生效
+        permission: 11111111=管理员, 11111100=成员, 00000000=访客
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 批量审批参数
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.ApplicationApproveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/realms_server.ApplicationApproveResponse'
+      summary: 审批山头服加入申请
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/application_query:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        获取服主待审核的加入申请队列
+        队列项包含 application_id、applicant_uid、source、source_card_inviter、submit_time
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 山头服 SID
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.ApplicationQueryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/realms_server.ApplicationQueryResponse'
+      summary: 查询山头服加入申请
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/blocklist_add:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        将指定玩家加入山头服黑名单; 若玩家是成员或正在游戏中, 游戏服务会同时移除并踢出该玩家
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 山头服 SID 和玩家 UID
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.BlocklistAddRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/giner.BasicResponse'
+      summary: 添加山头服黑名单
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/blocklist_query:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        通过山头服 SID 查询黑名单玩家列表
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 山头服 SID
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.BlocklistQueryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/realms_server.BlocklistQueryResponse'
+      summary: 查询山头服黑名单
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/blocklist_remove:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        将指定玩家从山头服黑名单移除; 玩家不在黑名单时操作仍会成功
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 山头服 SID 和玩家 UID
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.BlocklistRemoveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/giner.BasicResponse'
+      summary: 删除山头服黑名单
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/get_online_players:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        通过山头服 SID 分页查询当前在线玩家
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 在线玩家查询参数
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.GetOnlinePlayersRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/realms_server.GetOnlinePlayersResponse'
+      summary: 获取山头服在线玩家列表
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/invite_code_generate:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        为指定山头服生成永久有效的邀请码
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 山头服 SID
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.InviteCodeGenerateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/realms_server.InviteCodeGenerateResponse'
+      summary: 生成山头服邀请码
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/invite_code_query:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        通过山头服 SID 查询邀请码列表
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 山头服 SID
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.InviteCodeQueryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/realms_server.InviteCodeQueryResponse'
+      summary: 查询山头服邀请码
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/invite_code_remove:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        删除指定山头服的邀请码
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 山头服 SID 和邀请码
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.InviteCodeRemoveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/giner.BasicResponse'
+      summary: 删除山头服邀请码
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/invite_code_update:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        更新指定邀请码的分享文案
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 山头服 SID、邀请码和分享文案
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.InviteCodeUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/giner.BasicResponse'
+      summary: 更新山头服邀请码
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/member_invite:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        服主主动邀请指定玩家加入山头服
+        permission: 11111111=管理员, 11111100=成员, 00000000=访客
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 成员邀请参数
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.MemberInviteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/giner.BasicResponse'
+      summary: 邀请山头服成员
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/member_invite_query:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        查询服主已发出且仍待处理的成员邀请
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 山头服 SID
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.MemberInviteQueryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/realms_server.MemberInviteQueryResponse'
+      summary: 查询山头服成员邀请
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/member_invite_remove:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        撤回服主发出的待处理成员邀请
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 成员邀请撤回参数
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.MemberInviteRemoveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/giner.BasicResponse'
+      summary: 撤回山头服成员邀请
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/member_invite_update:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        修改待处理成员邀请的加入权限
+        permission: 11111111=管理员, 11111100=成员, 00000000=访客
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 成员邀请更新参数
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.MemberInviteUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/giner.BasicResponse'
+      summary: 更新山头服成员邀请
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/member_query:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        通过山头服 SID 查询成员列表
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 山头服 SID
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.MemberQueryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/realms_server.MemberQueryResponse'
+      summary: 查询山头服成员
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/member_remove:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        移除指定成员; remove_all=true 时移除全部成员且无需传 uid
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 成员移除参数
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.MemberRemoveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/giner.BasicResponse'
+      summary: 移除山头服成员
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/member_set_permission:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        权限值: 11111111=管理员, 11111100=成员, 00000000=访客
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 成员权限参数
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.MemberSetPermissionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/giner.BasicResponse'
+      summary: 设置山头服成员权限
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/search:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        通过游戏内带 # 前缀的山头码查询山头服详细信息
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: '需要查询的山头码, 例如 #12345678'
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.SearchRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/realms_server.SearchResponse'
+      summary: 查询山头服
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/turn_off:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        通过山头服 SID 关闭指定山头服
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 山头服 SID
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.TurnOffRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/giner.BasicResponse'
+      summary: 关闭山头服
+      tags:
+      - 山头服
+  /openapi/owner/realms_server/turn_on:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        通过山头服 SID 开启指定山头服
+        注意: 此 API 会尝试进行游戏登录 (Owner)
+      parameters:
+      - description: 此处需要填写 API Key, 可以从用户菜单获取
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 山头服 SID
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/realms_server.TurnOnRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功时返回
+          schema:
+            $ref: '#/definitions/giner.BasicResponse'
+      summary: 开启山头服
+      tags:
+      - 山头服
   /openapi/owner/rental_server/ban_player:
     post:
       consumes:

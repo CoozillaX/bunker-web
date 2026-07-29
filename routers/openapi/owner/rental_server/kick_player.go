@@ -1,7 +1,6 @@
 package rental_server
 
 import (
-	"bunker-web/models"
 	"bunker-web/pkg/g79"
 	"bunker-web/pkg/giner"
 	"net/http"
@@ -34,16 +33,7 @@ func (*RentalServer) KickPlayer(c *gin.Context) {
 		c.Error(giner.NewPublicGinError("无效参数"))
 		return
 	}
-	// Get user
-	u, _ := c.Get("usr")
-	usr := u.(*models.User)
-	// Check helper if exist
-	if usr.OwnerMpayUser == nil || usr.OwnerMpayUser.GetToken() == "" {
-		c.Error(giner.NewPublicGinError("请先绑定游戏账号"))
-		return
-	}
-	// Get g79 user
-	gu, ginerr := g79.HandleG79Login(usr.OwnerMpayUser)
+	gu, ginerr := g79.GetOwnerG79User(c)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

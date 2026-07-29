@@ -1,7 +1,6 @@
 package rental_server
 
 import (
-	"bunker-web/models"
 	"bunker-web/pkg/g79"
 	"bunker-web/pkg/giner"
 	"net/http"
@@ -12,7 +11,7 @@ import (
 type GetPlayerListRequest struct {
 	Status    *int   `json:"status"`                    // 玩家状态 (是否黑名单) (0, 1, null(不限))
 	ServerID  string `json:"server_id" binding:"min=1"` // 租赁服实体ID
-	OrderType int    `json:"order_type"`                // 排序类型 (0, 1)
+	OrderType int    `json:"order_type" example:"0"`    // 排序类型 (0, 1)
 	IsOnline  *bool  `json:"is_online"`                 // 是否在线 (false, true, null(不限))
 	Length    *int   `json:"length" example:"50"`       // 查询分页长度 (null(不限))
 	Offset    int    `json:"offset"`                    // 查询分页偏移
@@ -42,16 +41,7 @@ func (*RentalServer) GetPlayerList(c *gin.Context) {
 		c.Error(giner.NewPublicGinError("无效参数"))
 		return
 	}
-	// Get user
-	u, _ := c.Get("usr")
-	usr := u.(*models.User)
-	// Check helper if exist
-	if usr.HelperMpayUser == nil || usr.HelperMpayUser.GetToken() == "" {
-		c.Error(giner.NewPublicGinError("未创建辅助用户"))
-		return
-	}
-	// g79 login
-	gu, ginerr := g79.HandleG79Login(usr.HelperMpayUser)
+	gu, ginerr := g79.GetHelperG79User(c)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return
