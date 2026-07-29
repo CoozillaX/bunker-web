@@ -35,13 +35,17 @@ func init() {
 }
 
 func HandleG79Login(mu models.MpayUser) (*g79.G79User, *gin.Error) {
+	// need to initialise first for cache check
+	if protocolErr := mu.Initialise(); protocolErr != nil {
+		return nil, giner.NewGinErrorFromProtocolErr(protocolErr)
+	}
 	// check cache
 	if cached, ok := g79UserCache.Get(mu.GetUid() + mu.GetEngineVersion()); ok {
 		item := cached.(*g79UserCacheItem)
 		gu := item.gu
 		// if version match?
 		if mu.GetEngineVersion() == gu.GetEngineVersion() {
-			// if still valid ?
+			// if still valid?
 			if _, _, protocolErr := gu.AccOnlineExp(); protocolErr == nil {
 				item.ttl = defaultTTL // refresh ttl
 				g79UserCache.SetDefault(mu.GetUid()+mu.GetEngineVersion(), item)
