@@ -10,18 +10,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type JoinRealmsRequest struct {
+type SubmitRealmsApplicationRequest struct {
 	Code string `json:"code" binding:"min=1,max=20"`
 }
 
-func (*Helper) JoinRealms(c *gin.Context) {
+func (*Helper) SubmitRealmsApplication(c *gin.Context) {
 	// Get session
 	bearer, _ := c.Get("bearer")
 	session, _ := sessions.GetSessionByBearer(bearer.(string))
 	u, _ := session.Load("usr")
 	usr := u.(*models.User)
 	// Parse request
-	var req JoinRealmsRequest
+	var req SubmitRealmsApplicationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.Error(giner.NewPublicGinError("无效参数"))
 		return
@@ -39,12 +39,12 @@ func (*Helper) JoinRealms(c *gin.Context) {
 		c.Error(ginerr)
 		return
 	}
-	// Join realms server
-	if ginerr := gu.JoinRealmsServer(req.Code); ginerr != nil {
+	// Submit realms server application
+	if ginerr := gu.SubmitRealmsServerApplication(req.Code); ginerr != nil {
 		c.Error(giner.NewPublicGinError(ginerr.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, giner.MakeHTTPResponse(true).SetMessage("已成功加入山头服"))
+	c.JSON(http.StatusOK, giner.MakeHTTPResponse(true).SetMessage("已成功提交山头服申请"))
 	// Create log
-	c.Set("log", "加入山头服成功")
+	c.Set("log", "提交山头服加入申请成功")
 }

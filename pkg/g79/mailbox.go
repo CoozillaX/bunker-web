@@ -43,7 +43,7 @@ func GetGeneralMailList(gu *g79.G79User) ([]*G79MailBoxItem, *gin.Error) {
 		reader, protocolErr := gu.CreateHttpClient().
 			SetMethod(http.MethodPost).
 			SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + "/get-general-mail-list/").
-			SetRawBody([]byte(fmt.Sprintf(`{"mailid":"%s"}`, currentOffset))).
+			SetRawBody(fmt.Appendf(nil, `{"mailid":"%s"}`, currentOffset)).
 			SetTokenMode(g79.TOKEN_MODE_NORMAL).
 			Do()
 		if protocolErr != nil {
@@ -76,7 +76,7 @@ func ReadMails(gu *g79.G79User, mailItemList []*G79MailBoxItem) *gin.Error {
 		_, protocolErr := gu.CreateHttpClient().
 			SetMethod(http.MethodPost).
 			SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/get-detail-mail/").
-			SetRawBody([]byte(fmt.Sprintf(`{"mailid":"%s"}`, mailItem.MailID))).
+			SetRawBody(fmt.Appendf(nil, `{"mailid":"%s"}`, mailItem.MailID)).
 			SetTokenMode(g79.TOKEN_MODE_NORMAL).
 			Do()
 		if protocolErr != nil {

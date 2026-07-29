@@ -240,8 +240,8 @@ func RegisterWebAPI(router *gin.Engine) {
 			{
 				// Change helper name
 				helperGroup.POST("/change_name", routers.API.Helper.ChangeName)
-				// Join realms server
-				helperGroup.POST("/join_realms", routers.API.Helper.JoinRealms)
+				// Submit realms server application
+				helperGroup.POST("/submit_realms_application", routers.API.Helper.SubmitRealmsApplication)
 				// Bind account group
 				bindAccountGroup := helperGroup.Group("/bind_account")
 				{
