@@ -90,12 +90,12 @@ func QueryRealmsServerBlocklist(gu *g79.G79User, serverID string) ([]RealmsServe
 		return nil, giner.NewGinErrorFromProtocolErr(protocolErr)
 	}
 	var query struct {
-		Entity []RealmsServerBlocklistPlayer `json:"entity"`
+		Entities []RealmsServerBlocklistPlayer `json:"entities"`
 	}
 	if err := json.NewDecoder(reader).Decode(&query); err != nil {
 		return nil, giner.NewPrivateGinError(err)
 	}
-	return query.Entity, nil
+	return query.Entities, nil
 }
 
 func AddRealmsServerBlocklistPlayer(gu *g79.G79User, serverID, uid string) *gin.Error {
@@ -124,10 +124,11 @@ func updateRealmsServerBlocklist(gu *g79.G79User, serverID, uid, endpoint string
 }
 
 type RealmsServerInviteCode struct {
-	Code       string `json:"code"`        // 邀请码
-	ShareText  string `json:"share_text"`  // 分享文案
-	Permission int    `json:"permission"`  // 加入后的权限
-	ExpireTime int64  `json:"expire_time"` // 过期时间
+	Id         string `json:"id"`         // 邀请码 ID
+	ServerID   string `json:"sid"`        // 山头服 SID
+	Code       string `json:"code"`       // 邀请码
+	ShareText  string `json:"share_text"` // 分享文案
+	Permission string `json:"permission"` // 加入后的权限
 }
 
 func QueryRealmsServerInviteCodes(gu *g79.G79User, serverID string) ([]RealmsServerInviteCode, *gin.Error) {
@@ -144,12 +145,12 @@ func QueryRealmsServerInviteCodes(gu *g79.G79User, serverID string) ([]RealmsSer
 		return nil, giner.NewGinErrorFromProtocolErr(protocolErr)
 	}
 	var query struct {
-		Entity []RealmsServerInviteCode `json:"entity"`
+		Entities []RealmsServerInviteCode `json:"entities"`
 	}
 	if err := json.NewDecoder(reader).Decode(&query); err != nil {
 		return nil, giner.NewPrivateGinError(err)
 	}
-	return query.Entity, nil
+	return query.Entities, nil
 }
 
 func GenerateRealmsServerInviteCode(gu *g79.G79User, serverID string) (string, *gin.Error) {
@@ -217,14 +218,14 @@ func QueryRealmsServerMembers(gu *g79.G79User, serverID string) ([]map[string]an
 		return nil, giner.NewGinErrorFromProtocolErr(protocolErr)
 	}
 	var query struct {
-		Entity []map[string]any `json:"entity"`
+		Entities []map[string]any `json:"entities"`
 	}
 	decoder := json.NewDecoder(reader)
 	decoder.UseNumber()
 	if err := decoder.Decode(&query); err != nil {
 		return nil, giner.NewPrivateGinError(err)
 	}
-	return query.Entity, nil
+	return query.Entities, nil
 }
 
 func RemoveRealmsServerMember(gu *g79.G79User, serverID, uid string, removeAll bool) *gin.Error {
@@ -269,14 +270,14 @@ func QueryRealmsServerMemberInvites(gu *g79.G79User, serverID string) ([]map[str
 		return nil, giner.NewGinErrorFromProtocolErr(protocolErr)
 	}
 	var query struct {
-		Entity []map[string]any `json:"entity"`
+		Entities []map[string]any `json:"entities"`
 	}
 	decoder := json.NewDecoder(reader)
 	decoder.UseNumber()
 	if err := decoder.Decode(&query); err != nil {
 		return nil, giner.NewPrivateGinError(err)
 	}
-	return query.Entity, nil
+	return query.Entities, nil
 }
 
 func UpdateRealmsServerMemberInvite(gu *g79.G79User, serverID, uid, permission string) *gin.Error {

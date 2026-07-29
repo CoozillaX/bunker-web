@@ -1559,16 +1559,20 @@
                     "description": "邀请码",
                     "type": "string"
                 },
-                "expire_time": {
-                    "description": "过期时间",
-                    "type": "integer"
+                "id": {
+                    "description": "邀请码 ID",
+                    "type": "string"
                 },
                 "permission": {
                     "description": "加入后的权限",
-                    "type": "integer"
+                    "type": "string"
                 },
                 "share_text": {
                     "description": "分享文案",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "山头服 SID",
                     "type": "string"
                 }
             }
