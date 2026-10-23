@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bunker-core/protocol/mpay/android"
+	"bunker-core/protocol/mpay/windows"
 	"bunker-web/configs"
 	"bunker-web/routers"
 	"fmt"
 	"os"
 
 	"runtime/debug"
+	"sync"
 	"time"
 )
 
@@ -28,12 +31,38 @@ func handlePanic() {
 	}
 }
 
+func warmPublishedPackages() {
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		if err := (&android.AndroidMpayUser{}).UsePublishedPackage(); err != nil {
+			fmt.Println("android package:", err)
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		if err := (&windows.WindowsMpayUser{}).UsePublishedPackage(); err != nil {
+			fmt.Println("windows package:", err)
+		}
+	}()
+	wg.Wait()
+}
+
 // @title			BunkerWeb OpenAPI
 // @description	BunkerWeb OpenAPI document, feel free to contact us if you have any questions or suggestions.
 func main() {
 	defer handlePanic()
 
+	fmt.Println("Loading published packages...")
+	ready := make(chan struct{})
+	go func() {
+		warmPublishedPackages()
+		close(ready)
+	}()
+
 	router := routers.InitRouter()
+	<-ready
 
 	fmt.Println("Server starts running...")
 
