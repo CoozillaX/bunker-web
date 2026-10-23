@@ -22,6 +22,14 @@ jobs:
           token: ${{ secrets.GH_PAT }}
           path: bunker-core
 
+      - name: Setup Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: bunker-web/go.mod
+          cache-dependency-path: |
+            bunker-web/go.sum
+            bunker-core/go.sum
+
       - name: Setup go.work
         run: |
           go work init ./bunker-web ./bunker-core
