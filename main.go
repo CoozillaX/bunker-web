@@ -54,15 +54,16 @@ func warmPublishedPackages() {
 func main() {
 	defer handlePanic()
 
-	fmt.Println("Loading published packages...")
-	ready := make(chan struct{})
+	// Warm the packages without holding the server back. A request that needs
+	// one loads it on use, waiting for this warm-up if it is still running, so
+	// a slow CDN only delays those requests instead of keeping the API offline.
+	fmt.Println("Loading published packages in the background...")
 	go func() {
 		warmPublishedPackages()
-		close(ready)
+		fmt.Println("Published package warm-up finished")
 	}()
 
 	router := routers.InitRouter()
-	<-ready
 
 	fmt.Println("Server starts running...")
 
