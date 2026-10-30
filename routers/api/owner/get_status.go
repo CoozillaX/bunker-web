@@ -52,7 +52,7 @@ func (*Owner) GetStatus(c *gin.Context) {
 		return
 	}
 	// Get helper grow info
-	lv, exp, totalExp, ginerr := g79.GetG79LauncherLevel(gu)
+	lv, exp, totalExp, ginerr := g79.GetG79LauncherLevel(c.Request.Context(), gu)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

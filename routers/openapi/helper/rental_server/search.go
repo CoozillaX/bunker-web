@@ -42,7 +42,7 @@ func (*RentalServer) Search(c *gin.Context) {
 		return
 	}
 	// Get player info by name
-	serverInfo, ginerr := g79.QueryRentalServer(gu, req.ServerName)
+	serverInfo, ginerr := g79.QueryRentalServer(c.Request.Context(), gu, req.ServerName)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

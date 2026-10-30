@@ -37,7 +37,7 @@ func (*RealmsServer) BlocklistAdd(c *gin.Context) {
 		c.Error(ginerr)
 		return
 	}
-	if ginerr = g79.AddRealmsServerBlocklistPlayer(gu, req.ServerID, req.UID); ginerr != nil {
+	if ginerr = g79.AddRealmsServerBlocklistPlayer(c.Request.Context(), gu, req.ServerID, req.UID); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

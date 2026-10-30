@@ -4,6 +4,7 @@ import (
 	"bunker-core/protocol/g79"
 	"bunker-core/protocol/gameinfo"
 	"bunker-web/pkg/giner"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,8 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetG79LauncherLevel(gu *g79.G79User) (level, exp, needExp int, ginerr *gin.Error) {
-	reader, protocolErr := gu.CreateHttpClient().
+func GetG79LauncherLevel(ctx context.Context, gu *g79.G79User) (level, exp, needExp int, ginerr *gin.Error) {
+	reader, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + "/pe-get-grow-lv-exp").
 		SetRawBody([]byte("{}")).
@@ -39,8 +40,8 @@ type RandomName struct {
 	Type int    `json:"type"` // 昵称类型, 0 表示账号原有昵称
 }
 
-func GetRandomNames(gu *g79.G79User) ([]RandomName, *gin.Error) {
-	reader, protocolErr := gu.CreateHttpClient().
+func GetRandomNames(ctx context.Context, gu *g79.G79User) ([]RandomName, *gin.Error) {
+	reader, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/nickname-init/get-random-name").
 		SetRawBody([]byte("{}")).
@@ -60,11 +61,11 @@ func GetRandomNames(gu *g79.G79User) ([]RandomName, *gin.Error) {
 	return query.Entity.Names, nil
 }
 
-func ChangeUserName(gu *g79.G79User, name string) *gin.Error {
+func ChangeUserName(ctx context.Context, gu *g79.G79User, name string) *gin.Error {
 	reqBody, _ := json.Marshal(map[string]any{
 		"name": name,
 	})
-	_, protocolErr := gu.CreateHttpClient().
+	_, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/pe-nickname-setting/update").
 		SetRawBody(reqBody).
@@ -77,8 +78,8 @@ func ChangeUserName(gu *g79.G79User, name string) *gin.Error {
 	return nil
 }
 
-func UseGiftCode(gu *g79.G79User, code string) *gin.Error {
-	_, protocolErr := gu.CreateHttpClient().
+func UseGiftCode(ctx context.Context, gu *g79.G79User, code string) *gin.Error {
+	_, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/gift-code/").
 		SetRawBody(fmt.Appendf(nil, `{"code":"%s"}`, code)).

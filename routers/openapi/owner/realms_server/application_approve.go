@@ -57,7 +57,7 @@ func (*RealmsServer) ApplicationApprove(c *gin.Context) {
 		c.Error(ginerr)
 		return
 	}
-	result, ginerr := g79.ApproveRealmsServerApplications(gu, req.ServerID, req.Action, items)
+	result, ginerr := g79.ApproveRealmsServerApplications(c.Request.Context(), gu, req.ServerID, req.Action, items)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

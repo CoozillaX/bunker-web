@@ -41,7 +41,7 @@ func (*RealmsServer) BlocklistQuery(c *gin.Context) {
 		c.Error(ginerr)
 		return
 	}
-	players, ginerr := g79.QueryRealmsServerBlocklist(gu, req.ServerID)
+	players, ginerr := g79.QueryRealmsServerBlocklist(c.Request.Context(), gu, req.ServerID)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

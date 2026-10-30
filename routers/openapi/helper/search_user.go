@@ -42,7 +42,7 @@ func (*Helper) SearchUser(c *gin.Context) {
 		return
 	}
 	// Get player info by name
-	result, ginerr := g79.GetPlayerInfoByName(gu, req.Nickname)
+	result, ginerr := g79.GetPlayerInfoByName(c.Request.Context(), gu, req.Nickname)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

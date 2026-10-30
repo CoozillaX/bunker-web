@@ -40,7 +40,7 @@ func (*RentalServer) BanPlayer(c *gin.Context) {
 		return
 	}
 	// Request player ban
-	ginerr = g79.UpdateRentalServerPlayerBanStatus(gu, req.ServerID, strconv.Itoa(req.UID), req.Status)
+	ginerr = g79.UpdateRentalServerPlayerBanStatus(c.Request.Context(), gu, req.ServerID, strconv.Itoa(req.UID), req.Status)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

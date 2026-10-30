@@ -36,7 +36,7 @@ func (*RealmsServer) TurnOn(c *gin.Context) {
 		c.Error(ginerr)
 		return
 	}
-	if ginerr = g79.TurnOnRealmsServer(gu, req.ServerID); ginerr != nil {
+	if ginerr = g79.TurnOnRealmsServer(c.Request.Context(), gu, req.ServerID); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

@@ -42,7 +42,7 @@ func (*Helper) GetUserState(c *gin.Context) {
 		return
 	}
 	// Get player info by name
-	result, ginerr := g79.GetPlayerStateByUid(gu, req.Uid)
+	result, ginerr := g79.GetPlayerStateByUid(c.Request.Context(), gu, req.Uid)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

@@ -4,6 +4,7 @@ import (
 	"bunker-core/protocol/g79"
 	"bunker-core/protocol/gameinfo"
 	"bunker-web/pkg/giner"
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -36,11 +37,11 @@ type X19Player struct {
 	} `json:"pe_growth"`
 }
 
-func GetPlayerInfoByName(gu *g79.G79User, name string) ([]map[string]any, *gin.Error) {
+func GetPlayerInfoByName(ctx context.Context, gu *g79.G79User, name string) ([]map[string]any, *gin.Error) {
 	reqBody, _ := json.Marshal(map[string]any{
 		"name_or_mail": name,
 	})
-	reader, protocolErr := gu.CreateHttpClient().
+	reader, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/user-search-friend/").
 		SetRawBody(reqBody).
@@ -58,11 +59,11 @@ func GetPlayerInfoByName(gu *g79.G79User, name string) ([]map[string]any, *gin.E
 	return query.Entities, nil
 }
 
-func GetPlayerDetailsByUid(gu *g79.G79User, uid int) (map[string]any, *gin.Error) {
+func GetPlayerDetailsByUid(ctx context.Context, gu *g79.G79User, uid int) (map[string]any, *gin.Error) {
 	reqBody, _ := json.Marshal(map[string]any{
 		"entity_id": uid,
 	})
-	reader, protocolErr := gu.CreateHttpClient().
+	reader, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/user-detail/query/other").
 		SetRawBody(reqBody).
@@ -80,11 +81,11 @@ func GetPlayerDetailsByUid(gu *g79.G79User, uid int) (map[string]any, *gin.Error
 	return query.Entity, nil
 }
 
-func GetPlayerStateByUid(gu *g79.G79User, uid int) (map[string]any, *gin.Error) {
+func GetPlayerStateByUid(ctx context.Context, gu *g79.G79User, uid int) (map[string]any, *gin.Error) {
 	reqBody, _ := json.Marshal(map[string]any{
 		"search_id": uid,
 	})
-	reader, protocolErr := gu.CreateHttpClient().
+	reader, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/user-stat/get-user-state").
 		SetRawBody(reqBody).

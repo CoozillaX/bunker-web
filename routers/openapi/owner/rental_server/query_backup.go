@@ -42,7 +42,7 @@ func (*RentalServer) QueryBackup(c *gin.Context) {
 		return
 	}
 
-	backupInfoList, ginerr := g79.QueryRentalServerBackup(gu, req.ServerCode)
+	backupInfoList, ginerr := g79.QueryRentalServerBackup(c.Request.Context(), gu, req.ServerCode)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

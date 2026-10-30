@@ -38,7 +38,7 @@ func (*RentalServer) SetLevelLimitation(c *gin.Context) {
 		return
 	}
 	// Try to set level limitation
-	if ginerr := g79.SetRentalServerLevelLimitation(gu, req.ServerCode, req.Level); ginerr != nil {
+	if ginerr := g79.SetRentalServerLevelLimitation(c.Request.Context(), gu, req.ServerCode, req.Level); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

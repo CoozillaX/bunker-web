@@ -40,7 +40,7 @@ func (*RealmsServer) InviteCodeGenerate(c *gin.Context) {
 		c.Error(ginerr)
 		return
 	}
-	code, ginerr := g79.GenerateRealmsServerInviteCode(gu, req.ServerID)
+	code, ginerr := g79.GenerateRealmsServerInviteCode(c.Request.Context(), gu, req.ServerID)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

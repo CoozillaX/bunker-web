@@ -8,6 +8,7 @@ import (
 	"bunker-web/pkg/giner"
 	"bunker-web/pkg/sessions"
 	"bunker-web/services/user"
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -41,18 +42,21 @@ type LoginResponse struct {
 
 var versionCache = cache.New(24*time.Hour, time.Hour) // cache[serverCode]bedrockVersion
 
-func requestServerInfo(
-	mu models.MpayUser,
-	req *LoginRequest,
-) (*g79.G79User, *g79.MCServerInfo, *gin.Error) {
+func requestServerInfo(ctx context.Context, mu models.MpayUser, req *LoginRequest) (*g79.G79User, *g79.MCServerInfo, *gin.Error) {
+	if ctx.Err() != nil {
+		return nil, nil, giner.NewPublicGinError("请求已取消或等待超时")
+	}
 	// change engine version by cache
 	if value, ok := versionCache.Get(req.ServerCode); ok {
 		if err := mu.UpdateGameInfoByBedrockVersion(value.(string)); err != nil {
-			return nil, nil, giner.NewPublicGinError(fmt.Sprintf("无法获取游戏信息: %s", err.Error()))
+			if protocolErr, ok := err.(*defines.ProtocolError); ok {
+				return nil, nil, giner.NewGinErrorFromProtocolErr(protocolErr)
+			}
+			return nil, nil, giner.NewPublicGinError(fmt.Sprintf("游戏信息尚未就绪: %s", err.Error()))
 		}
 	}
 	// g79 login
-	gu, ginerr := g79_utils.HandleG79Login(mu)
+	gu, ginerr := g79_utils.HandleG79Login(ctx, mu)
 	if ginerr != nil {
 		return nil, nil, ginerr
 	}
@@ -60,9 +64,9 @@ func requestServerInfo(
 	var serverInfo *g79.MCServerInfo
 	var protocolErr *defines.ProtocolError
 	if after, ok := strings.CutPrefix(req.ServerCode, "#"); ok {
-		serverInfo, protocolErr = gu.ImpactRealmsServer(after, req.ClientPublicKey)
+		serverInfo, protocolErr = gu.ImpactRealmsServer(ctx, after, req.ClientPublicKey)
 	} else {
-		serverInfo, protocolErr = gu.ImpactRentalServer(req.ServerCode, req.ServerPasscode, req.ClientPublicKey)
+		serverInfo, protocolErr = gu.ImpactRentalServer(ctx, req.ServerCode, req.ServerPasscode, req.ClientPublicKey)
 	}
 	if protocolErr != nil {
 		return nil, nil, giner.NewGinErrorFromProtocolErr(protocolErr)
@@ -73,7 +77,7 @@ func requestServerInfo(
 	// check version
 	if gu.GetBedrockVersion() != rentalBedrockVersion {
 		// re-login and get chain with updated engine version
-		return requestServerInfo(mu, req)
+		return requestServerInfo(ctx, mu, req)
 	}
 	return gu, serverInfo, nil
 }
@@ -123,7 +127,9 @@ func (*Phoenix) Login(c *gin.Context) {
 		return
 	}
 	// Query server info
-	gu, serverInfo, ginerr := requestServerInfo(usr.HelperMpayUser, &req)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 100*time.Second)
+	defer cancel()
+	gu, serverInfo, ginerr := requestServerInfo(ctx, usr.HelperMpayUser, &req)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return
@@ -134,13 +140,13 @@ func (*Phoenix) Login(c *gin.Context) {
 		return
 	}
 	// Fetch growth level
-	lv, _, _, ginerr := g79_utils.GetG79LauncherLevel(gu)
+	lv, _, _, ginerr := g79_utils.GetG79LauncherLevel(ctx, gu)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return
 	}
 	// Get helper using mod
-	usingMod, ginerr := g79_utils.GetCurrentUsingMod(gu)
+	usingMod, ginerr := g79_utils.GetCurrentUsingMod(ctx, gu)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

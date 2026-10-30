@@ -5,6 +5,7 @@ import (
 	"bunker-web/models"
 	"bunker-web/pkg/giner"
 	"bunker-web/pkg/sessions"
+	"context"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -25,17 +26,22 @@ var (
 func init() {
 	g79UserCache = cache.New(25*time.Minute, 5*time.Minute)
 	g79UserCache.OnEvicted(func(uid string, value any) {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
 		item := value.(*g79UserCacheItem)
-		if item.ttl > 0 && item.gu.Update() == nil { // no need to logout if update failed
+		if item.ttl > 0 && item.gu.Update(ctx) == nil { // no need to logout if update failed
 			item.ttl--
 			g79UserCache.SetDefault(uid, item)
 		} else {
-			item.gu.Logout()
+			item.gu.Logout(ctx)
 		}
 	})
 }
 
-func HandleG79Login(mu models.MpayUser) (*g79.G79User, *gin.Error) {
+func HandleG79Login(ctx context.Context, mu models.MpayUser) (*g79.G79User, *gin.Error) {
+	if ctx.Err() != nil {
+		return nil, giner.NewPublicGinError(ctx.Err().Error())
+	}
 	// need to initialise first for cache check
 	if protocolErr := mu.Initialise(); protocolErr != nil {
 		return nil, giner.NewGinErrorFromProtocolErr(protocolErr)
@@ -45,9 +51,9 @@ func HandleG79Login(mu models.MpayUser) (*g79.G79User, *gin.Error) {
 		item := cached.(*g79UserCacheItem)
 		gu := item.gu
 		// if version match?
-		if mu.GetEngineVersion() == gu.GetEngineVersion() {
+		if mu.GetEngineVersion() == gu.GetEngineVersion() && mu.GetPatchVersion() == gu.GetPatchVersion() {
 			// if still valid?
-			if _, _, protocolErr := gu.AccOnlineExp(); protocolErr == nil {
+			if _, _, protocolErr := gu.AccOnlineExp(ctx); protocolErr == nil {
 				item.ttl = defaultTTL // refresh ttl
 				g79UserCache.SetDefault(mu.GetUid()+mu.GetEngineVersion(), item)
 				return gu, nil
@@ -55,7 +61,7 @@ func HandleG79Login(mu models.MpayUser) (*g79.G79User, *gin.Error) {
 		}
 	}
 	// g79 login
-	gu, protocolErr := g79.Login(mu)
+	gu, protocolErr := g79.Login(ctx, mu)
 	if protocolErr != nil {
 		return nil, giner.NewGinErrorFromProtocolErr(protocolErr)
 	}
@@ -72,7 +78,7 @@ func GetHelperG79User(c *gin.Context) (*g79.G79User, *gin.Error) {
 	if !ok || usr.HelperMpayUser == nil || usr.HelperMpayUser.GetToken() == "" {
 		return nil, giner.NewPublicGinError("未创建辅助用户")
 	}
-	return HandleG79Login(usr.HelperMpayUser)
+	return HandleG79Login(c.Request.Context(), usr.HelperMpayUser)
 }
 
 func GetOwnerG79User(c *gin.Context) (*g79.G79User, *gin.Error) {
@@ -80,7 +86,7 @@ func GetOwnerG79User(c *gin.Context) (*g79.G79User, *gin.Error) {
 	if !ok || usr.OwnerMpayUser == nil || usr.OwnerMpayUser.GetToken() == "" {
 		return nil, giner.NewPublicGinError("请先绑定游戏账号")
 	}
-	return HandleG79Login(usr.OwnerMpayUser)
+	return HandleG79Login(c.Request.Context(), usr.OwnerMpayUser)
 }
 
 func getUserFromContext(c *gin.Context) (*models.User, bool) {

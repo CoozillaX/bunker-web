@@ -47,7 +47,7 @@ func (*RealmsServer) Search(c *gin.Context) {
 		return
 	}
 
-	result, ginerr := g79.QueryRealmsServer(gu, req.ServerCode)
+	result, ginerr := g79.QueryRealmsServer(c.Request.Context(), gu, req.ServerCode)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

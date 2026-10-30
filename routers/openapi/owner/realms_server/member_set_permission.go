@@ -37,7 +37,7 @@ func (*RealmsServer) MemberSetPermission(c *gin.Context) {
 		c.Error(ginerr)
 		return
 	}
-	if ginerr = g79.SetRealmsServerMemberPermission(gu, req.ServerID, req.UID, req.Permission); ginerr != nil {
+	if ginerr = g79.SetRealmsServerMemberPermission(c.Request.Context(), gu, req.ServerID, req.UID, req.Permission); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

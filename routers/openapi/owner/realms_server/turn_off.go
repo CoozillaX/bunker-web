@@ -36,7 +36,7 @@ func (*RealmsServer) TurnOff(c *gin.Context) {
 		c.Error(ginerr)
 		return
 	}
-	if ginerr = g79.TurnOffRealmsServer(gu, req.ServerID); ginerr != nil {
+	if ginerr = g79.TurnOffRealmsServer(c.Request.Context(), gu, req.ServerID); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

@@ -36,7 +36,7 @@ func (*RealmsServer) MemberInviteRemove(c *gin.Context) {
 		c.Error(ginerr)
 		return
 	}
-	if ginerr = g79.RemoveRealmsServerMemberInvite(gu, req.ServerID, req.UID); ginerr != nil {
+	if ginerr = g79.RemoveRealmsServerMemberInvite(c.Request.Context(), gu, req.ServerID, req.UID); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

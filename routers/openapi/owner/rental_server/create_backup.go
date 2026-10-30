@@ -40,7 +40,7 @@ func (*RentalServer) CreateBackup(c *gin.Context) {
 		return
 	}
 	// Try to set level limitation
-	if ginerr := g79.CreateRentalServerBackup(gu, req.ServerCode, req.BackupSlot, req.BackupName); ginerr != nil {
+	if ginerr := g79.CreateRentalServerBackup(c.Request.Context(), gu, req.ServerCode, req.BackupSlot, req.BackupName); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

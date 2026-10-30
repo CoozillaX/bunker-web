@@ -66,7 +66,7 @@ func (*BindAccount) SendSMS(c *gin.Context) {
 	}
 	// Try to request code
 	if protocolErr := usr.HelperMpayUser.SMSLoginRequestCode(req.Mobile); protocolErr != nil {
-		c.JSON(http.StatusOK, giner.MakeHTTPResponse(false).SetData(
+		c.JSON(http.StatusOK, giner.MakeHTTPResponse(false).SetMessage(protocolErr.Message).SetData(
 			&SendSMSResponseData{
 				VerifyUrl: protocolErr.VerifyUrl,
 			},

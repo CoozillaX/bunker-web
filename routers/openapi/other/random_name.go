@@ -30,7 +30,7 @@ func (*Other) RandomName(c *gin.Context) {
 		return
 	}
 
-	names, ginerr := g79.GetRandomNames(gu)
+	names, ginerr := g79.GetRandomNames(c.Request.Context(), gu)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

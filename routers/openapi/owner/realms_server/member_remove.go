@@ -37,7 +37,7 @@ func (*RealmsServer) MemberRemove(c *gin.Context) {
 		c.Error(ginerr)
 		return
 	}
-	if ginerr = g79.RemoveRealmsServerMember(gu, req.ServerID, req.UID, req.RemoveAll); ginerr != nil {
+	if ginerr = g79.RemoveRealmsServerMember(c.Request.Context(), gu, req.ServerID, req.UID, req.RemoveAll); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

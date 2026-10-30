@@ -40,7 +40,7 @@ func (*RealmsServer) InviteCodeQuery(c *gin.Context) {
 		c.Error(ginerr)
 		return
 	}
-	codes, ginerr := g79.QueryRealmsServerInviteCodes(gu, req.ServerID)
+	codes, ginerr := g79.QueryRealmsServerInviteCodes(c.Request.Context(), gu, req.ServerID)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

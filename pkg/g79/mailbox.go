@@ -4,6 +4,7 @@ import (
 	"bunker-core/protocol/g79"
 	"bunker-core/protocol/gameinfo"
 	"bunker-web/pkg/giner"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -35,12 +36,12 @@ type G79MailBoxItem struct {
 	Nickname       string `json:"nickname"`
 }
 
-func GetGeneralMailList(gu *g79.G79User) ([]*G79MailBoxItem, *gin.Error) {
+func GetGeneralMailList(ctx context.Context, gu *g79.G79User) ([]*G79MailBoxItem, *gin.Error) {
 	var result []*G79MailBoxItem
 	currentOffset := "0"
 	for {
 		// 1. Do req
-		reader, protocolErr := gu.CreateHttpClient().
+		reader, protocolErr := gu.CreateHttpClient(ctx).
 			SetMethod(http.MethodPost).
 			SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + "/get-general-mail-list/").
 			SetRawBody(fmt.Appendf(nil, `{"mailid":"%s"}`, currentOffset)).
@@ -68,12 +69,12 @@ func GetGeneralMailList(gu *g79.G79User) ([]*G79MailBoxItem, *gin.Error) {
 	}
 }
 
-func ReadMails(gu *g79.G79User, mailItemList []*G79MailBoxItem) *gin.Error {
+func ReadMails(ctx context.Context, gu *g79.G79User, mailItemList []*G79MailBoxItem) *gin.Error {
 	for _, mailItem := range mailItemList {
 		if mailItem.IsRead == "1" {
 			continue
 		}
-		_, protocolErr := gu.CreateHttpClient().
+		_, protocolErr := gu.CreateHttpClient(ctx).
 			SetMethod(http.MethodPost).
 			SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/get-detail-mail/").
 			SetRawBody(fmt.Appendf(nil, `{"mailid":"%s"}`, mailItem.MailID)).
@@ -86,7 +87,7 @@ func ReadMails(gu *g79.G79User, mailItemList []*G79MailBoxItem) *gin.Error {
 	return nil
 }
 
-func ClaimMailRewards(gu *g79.G79User, mailItemList []*G79MailBoxItem) *gin.Error {
+func ClaimMailRewards(ctx context.Context, gu *g79.G79User, mailItemList []*G79MailBoxItem) *gin.Error {
 	idList := make([]string, 0)
 	for _, mailItem := range mailItemList {
 		if mailItem.ReceivedReward == "1" {
@@ -117,7 +118,7 @@ func ClaimMailRewards(gu *g79.G79User, mailItemList []*G79MailBoxItem) *gin.Erro
 	reqBody, _ := json.Marshal(map[string]any{
 		"mailidlist": idList,
 	})
-	_, protocolErr := gu.CreateHttpClient().
+	_, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/get-all-mail-reward/").
 		SetRawBody(reqBody).

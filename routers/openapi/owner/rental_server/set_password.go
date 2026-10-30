@@ -38,7 +38,7 @@ func (*RentalServer) SetPassword(c *gin.Context) {
 		return
 	}
 	// Try to set level limitation
-	if ginerr := g79.SetRentalServerPasswordCode(gu, req.ServerCode, req.Password); ginerr != nil {
+	if ginerr := g79.SetRentalServerPasswordCode(c.Request.Context(), gu, req.ServerCode, req.Password); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

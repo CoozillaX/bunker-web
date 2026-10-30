@@ -34,7 +34,7 @@ func (*Owner) UseGiftCode(c *gin.Context) {
 	// Store to DB
 	defer models.DBSave(usr.OwnerMpayUser)
 	// Use gift code
-	if ginerr := g79.UseGiftCode(gu, req.Code); ginerr != nil {
+	if ginerr := g79.UseGiftCode(c.Request.Context(), gu, req.Code); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

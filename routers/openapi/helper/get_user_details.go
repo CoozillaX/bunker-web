@@ -42,7 +42,7 @@ func (*Helper) GetUserDetails(c *gin.Context) {
 		return
 	}
 	// Get player info by name
-	result, ginerr := g79.GetPlayerDetailsByUid(gu, req.Uid)
+	result, ginerr := g79.GetPlayerDetailsByUid(c.Request.Context(), gu, req.Uid)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

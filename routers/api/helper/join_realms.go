@@ -34,7 +34,7 @@ func (*Helper) SubmitRealmsApplication(c *gin.Context) {
 	// Store to DB
 	defer models.DBSave(usr.HelperMpayUser)
 	// Submit realms server application
-	if ginerr := gu.SubmitRealmsServerApplication(req.Code); ginerr != nil {
+	if ginerr := gu.SubmitRealmsServerApplication(c.Request.Context(), req.Code); ginerr != nil {
 		c.Error(giner.NewPublicGinError(ginerr.Error()))
 		return
 	}

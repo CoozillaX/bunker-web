@@ -48,7 +48,7 @@ func (*RealmsServer) GetOnlinePlayers(c *gin.Context) {
 		return
 	}
 
-	players, ginerr := g79.QueryRealmsServerOnlinePlayers(gu, req.ServerID, req.Offset, req.Length, req.OrderType)
+	players, ginerr := g79.QueryRealmsServerOnlinePlayers(c.Request.Context(), gu, req.ServerID, req.Offset, req.Length, req.OrderType)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

@@ -37,7 +37,7 @@ func (*RealmsServer) BlocklistRemove(c *gin.Context) {
 		c.Error(ginerr)
 		return
 	}
-	if ginerr = g79.RemoveRealmsServerBlocklistPlayer(gu, req.ServerID, req.UID); ginerr != nil {
+	if ginerr = g79.RemoveRealmsServerBlocklistPlayer(c.Request.Context(), gu, req.ServerID, req.UID); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

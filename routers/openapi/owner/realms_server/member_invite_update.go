@@ -38,7 +38,7 @@ func (*RealmsServer) MemberInviteUpdate(c *gin.Context) {
 		c.Error(ginerr)
 		return
 	}
-	if ginerr = g79.UpdateRealmsServerMemberInvite(gu, req.ServerID, req.UID, req.Permission); ginerr != nil {
+	if ginerr = g79.UpdateRealmsServerMemberInvite(c.Request.Context(), gu, req.ServerID, req.UID, req.Permission); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

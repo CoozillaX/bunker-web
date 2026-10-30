@@ -4,6 +4,7 @@ import (
 	"bunker-core/protocol/g79"
 	"bunker-core/protocol/gameinfo"
 	"bunker-web/pkg/giner"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -16,9 +17,9 @@ type DownloadInfo struct {
 	ResUrl   string `json:"res_url"`
 }
 
-func GetDownloadInfoByItemID(gu *g79.G79User, id string) (*DownloadInfo, *gin.Error) {
+func GetDownloadInfoByItemID(ctx context.Context, gu *g79.G79User, id string) (*DownloadInfo, *gin.Error) {
 	// 1. Do req
-	reader, protocolErr := gu.CreateHttpClient().
+	reader, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + "/pe-download-item/get-download-info").
 		SetRawBody(fmt.Appendf(nil, `{"item_id":"%s"}`, id)).

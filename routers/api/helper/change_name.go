@@ -35,7 +35,7 @@ func (*Helper) ChangeName(c *gin.Context) {
 	// Store to DB
 	defer models.DBSave(usr.HelperMpayUser)
 	// Change name
-	if ginerr := g79.ChangeUserName(gu, req.UserName); ginerr != nil {
+	if ginerr := g79.ChangeUserName(c.Request.Context(), gu, req.UserName); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

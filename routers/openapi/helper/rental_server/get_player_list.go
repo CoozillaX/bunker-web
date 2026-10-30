@@ -47,7 +47,7 @@ func (*RentalServer) GetPlayerList(c *gin.Context) {
 		return
 	}
 	// Get player info by name
-	result, ginerr := g79.QueryRentalServerPlayerList(gu, req.Status, req.ServerID, req.OrderType, req.IsOnline, req.Length, req.Offset)
+	result, ginerr := g79.QueryRentalServerPlayerList(c.Request.Context(), gu, req.Status, req.ServerID, req.OrderType, req.IsOnline, req.Length, req.Offset)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

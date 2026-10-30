@@ -38,7 +38,7 @@ func (*RentalServer) TurnOn(c *gin.Context) {
 		return
 	}
 	// Try to turn on rental server
-	ginerr = g79.TurnOnRentalServer(gu, req.ServerCode, time.Second*20)
+	ginerr = g79.TurnOnRentalServer(c.Request.Context(), gu, req.ServerCode, time.Second*120)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

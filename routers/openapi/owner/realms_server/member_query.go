@@ -40,7 +40,7 @@ func (*RealmsServer) MemberQuery(c *gin.Context) {
 		c.Error(ginerr)
 		return
 	}
-	members, ginerr := g79.QueryRealmsServerMembers(gu, req.ServerID)
+	members, ginerr := g79.QueryRealmsServerMembers(c.Request.Context(), gu, req.ServerID)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

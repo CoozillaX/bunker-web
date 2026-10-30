@@ -39,7 +39,7 @@ func (*RentalServer) KickPlayer(c *gin.Context) {
 		return
 	}
 	// Request player kick
-	ginerr = g79.KickRentalServerPlayer(gu, req.ServerID, strconv.Itoa(req.UID))
+	ginerr = g79.KickRentalServerPlayer(c.Request.Context(), gu, req.ServerID, strconv.Itoa(req.UID))
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

@@ -4,6 +4,7 @@ import (
 	"bunker-core/protocol/g79"
 	"bunker-core/protocol/gameinfo"
 	"bunker-web/pkg/giner"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -17,8 +18,9 @@ const (
 	RentalServerStatusStopped = iota
 	RentalServerStatusRunning
 	//RentalServerStatusUnintialized
-	RentalServerStatusInitializing = 7
-	RentalServerStatusUpdating     = 8
+	RentalServerStatusInitializing      = 7
+	RentalServerStatusDockerUnavailable = 8
+	RentalServerStatusUpdating          = 10
 )
 
 type RentalServerInfo struct {
@@ -45,7 +47,7 @@ type RentalServerInfo struct {
 	ChainInfo    string `json:"chainInfo,omitempty"`
 }
 
-func QueryRentalServer(gu *g79.G79User, name string) (*RentalServerInfo, *gin.Error) {
+func QueryRentalServer(ctx context.Context, gu *g79.G79User, name string) (*RentalServerInfo, *gin.Error) {
 	// 1. Init server info
 	serverInfo := &RentalServerInfo{}
 	// 2. Get entity id
@@ -54,7 +56,7 @@ func QueryRentalServer(gu *g79.G79User, name string) (*RentalServerInfo, *gin.Er
 			"server_name": name,
 			"offset":      0,
 		})
-		reader, protocolErr := gu.CreateHttpClient().
+		reader, protocolErr := gu.CreateHttpClient(ctx).
 			SetMethod(http.MethodPost).
 			SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/rental-server/query/search-by-name").
 			SetRawBody(reqBody).
@@ -79,14 +81,14 @@ func QueryRentalServer(gu *g79.G79User, name string) (*RentalServerInfo, *gin.Er
 	return serverInfo, nil
 }
 
-func QueryMyRentalServers(gu *g79.G79User) (result []*RentalServerInfo, ginerr *gin.Error) {
+func QueryMyRentalServers(ctx context.Context, gu *g79.G79User) (result []*RentalServerInfo, ginerr *gin.Error) {
 	offset := 0
 	for {
 		reqBody, _ := json.Marshal(map[string]any{
 			"offset": offset,
 			"length": 100,
 		})
-		reader, protocolErr := gu.CreateHttpClient().
+		reader, protocolErr := gu.CreateHttpClient(ctx).
 			SetMethod(http.MethodPost).
 			SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/my-rental-server/query/search-by-user").
 			SetRawBody(reqBody).
@@ -129,147 +131,117 @@ func QueryMyRentalServers(gu *g79.G79User) (result []*RentalServerInfo, ginerr *
 	}
 }
 
-func GetRentalServerIP(gu *g79.G79User, serverInfo *RentalServerInfo, passcode string) *gin.Error {
-	reqBody, _ := json.Marshal(map[string]any{
-		"server_id": serverInfo.EntityID,
-		"pwd":       passcode,
-	})
-	reader, protocolErr := gu.CreateHttpClient().
-		SetMethod(http.MethodPost).
-		SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/rental-server-world-enter/get").
-		SetRawBody(reqBody).
-		SetTokenMode(g79.TOKEN_MODE_NORMAL).
-		Do()
-	if protocolErr != nil {
-		return giner.NewGinErrorFromProtocolErr(protocolErr)
+func GetRentalServerIP(ctx context.Context, gu *g79.G79User, serverInfo *RentalServerInfo, passcode string) *gin.Error {
+	if serverInfo == nil {
+		return giner.NewPublicGinError("获取租赁服信息失败，请稍后重试")
 	}
-	var query struct {
-		Entity *struct {
-			MCServerHost string `json:"mcserver_host"`
-			MCServerPort int    `json:"mcserver_port"`
-			State        int    `json:"state"`
-		} `json:"entity"`
+	// Never leave a previously resolved address on an unsuccessful new attempt.
+	serverInfo.IPAddress = ""
+	address, err := gu.QueryRentalServerIP(ctx, serverInfo.EntityID, passcode)
+	if err != nil {
+		return giner.NewGinErrorFromProtocolErr(err)
 	}
-	if err := json.NewDecoder(reader).Decode(&query); err != nil {
-		return giner.NewPrivateGinError(err)
-	}
-	if query.Entity == nil || query.Entity.State != 1 {
-		return giner.NewPublicGinError("请求服务器信息失败, 请确认是否满足等级限制与密码后重试")
-	}
-	serverInfo.IPAddress = fmt.Sprintf("%v:%v", query.Entity.MCServerHost, query.Entity.MCServerPort)
+	serverInfo.IPAddress = address
 	return nil
 }
 
-func updateRentalServerAndWaitFinished(gu *g79.G79User, sid string, newStatus int, timeout time.Duration) (ginerr *gin.Error) {
-	// 1. Send command
-	{
-		reqBody, _ := json.Marshal(map[string]any{
-			"status":    newStatus,
-			"server_id": sid,
-		})
-		_, protocolErr := gu.CreateHttpClient().
-			SetMethod(http.MethodPost).
-			SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/rental-server-control/update").
-			SetRawBody(reqBody).
-			SetTokenMode(g79.TOKEN_MODE_NORMAL).
-			Do()
-		if protocolErr != nil {
-			return giner.NewGinErrorFromProtocolErr(protocolErr)
+// The command and every poll share one deadline. No detached polling goroutine.
+func updateRentalServer(parent context.Context, gu *g79.G79User, sid string, newStatus int, timeout time.Duration) *gin.Error {
+	ctx, cancel := context.WithTimeout(parent, timeout)
+	defer cancel()
+	timeoutError := func() *gin.Error {
+		if parent.Err() != nil {
+			return giner.NewPublicGinError("请求已取消")
 		}
+		return giner.NewPublicGinError("服务器操作尚未确认完成，请先检查当前状态，避免重复操作")
 	}
-	// 2. Wait rental server finished
-	{
-		waitChan := make(chan struct{})
-		isFinished := false
-		// Polling with 1 second interval
-		go func() {
-			defer close(waitChan)
-			for {
-				time.Sleep(time.Second)
-				if isFinished {
-					return
-				}
-				reqBody, _ := json.Marshal(map[string]any{
-					"server_id": sid,
-				})
-				reader, protocolErr := gu.CreateHttpClient().
-					SetMethod(http.MethodPost).
-					SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/rental-server-control/get-status").
-					SetRawBody(reqBody).
-					SetTokenMode(g79.TOKEN_MODE_NORMAL).
-					Do()
-				if protocolErr != nil {
-					ginerr = giner.NewGinErrorFromProtocolErr(protocolErr)
-					return
-				}
-				var query struct {
-					Entity *struct {
-						Status int `json:"status"`
-					} `json:"entity"`
-				}
-				if err := json.NewDecoder(reader).Decode(&query); err != nil {
-					ginerr = giner.NewPrivateGinError(err)
-					return
-				}
-				if query.Entity == nil {
-					ginerr = giner.NewPublicGinError("获取服务器状态失败")
-					return
-				}
-				if query.Entity.Status == newStatus {
-					return
-				}
+	if ctx.Err() != nil {
+		return timeoutError()
+	}
+	body, _ := json.Marshal(map[string]any{"status": newStatus, "server_id": sid})
+	_, err := gu.CreateHttpClient(ctx).SetMethod(http.MethodPost).
+		SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + "/rental-server-control/update").
+		SetRawBody(body).SetTokenMode(g79.TOKEN_MODE_NORMAL).Do()
+	if err != nil {
+		if ctx.Err() != nil {
+			return timeoutError()
+		}
+		return giner.NewGinErrorFromProtocolErr(err)
+	}
+	for {
+		if ctx.Err() != nil {
+			return timeoutError()
+		}
+		body, _ := json.Marshal(map[string]any{"server_id": sid})
+		reader, err := gu.CreateHttpClient(ctx).SetMethod(http.MethodPost).
+			SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + "/rental-server-control/get-status").
+			SetRawBody(body).SetTokenMode(g79.TOKEN_MODE_NORMAL).Do()
+		if err != nil {
+			if ctx.Err() != nil {
+				return timeoutError()
 			}
-		}()
-		// Wait finished or timeout
+			return giner.NewGinErrorFromProtocolErr(err)
+		}
+		var result struct {
+			Entity *struct {
+				Status *int `json:"status"`
+			} `json:"entity"`
+		}
+		if err := json.NewDecoder(reader).Decode(&result); err != nil {
+			return giner.NewPrivateGinError(err)
+		}
+		if result.Entity != nil && result.Entity.Status != nil {
+			status := *result.Entity.Status
+			if status == newStatus {
+				return nil
+			}
+			switch status {
+			case RentalServerStatusStopped, RentalServerStatusRunning, 3, 4, RentalServerStatusInitializing, RentalServerStatusDockerUnavailable, RentalServerStatusUpdating:
+				// Opposite stable state may still be visible immediately after the command.
+			default:
+				return giner.NewPublicGinError("服务器当前状态不支持此操作，请先确认服务器状态")
+			}
+		}
+		timer := time.NewTimer(2 * time.Second)
 		select {
-		case <-waitChan:
-		case <-time.After(timeout):
-			ginerr = giner.NewPublicGinError("服务器状态转换未能在指定时间内完成，请耐心等待")
-		}
-		isFinished = true
-		return ginerr
-	}
-
-}
-
-func TurnOnRentalServer(gu *g79.G79User, name string, timeout time.Duration) *gin.Error {
-	// 1. Query all rental servers
-	serverInfos, ginerr := QueryMyRentalServers(gu)
-	if ginerr != nil {
-		return ginerr
-	}
-	// 2. Get entity id by name
-	for _, serverInfo := range serverInfos {
-		if serverInfo.Name == name {
-			return updateRentalServerAndWaitFinished(gu, serverInfo.EntityID, RentalServerStatusRunning, timeout)
+		case <-ctx.Done():
+			timer.Stop()
+			return timeoutError()
+		case <-timer.C:
 		}
 	}
-	return giner.NewPublicGinError("未查找到服务器")
-
 }
 
-func TurnOffRentalServer(gu *g79.G79User, name string, timeout time.Duration) *gin.Error {
-	// 1. Query all rental servers
-	serverInfos, ginerr := QueryMyRentalServers(gu)
-	if ginerr != nil {
-		return ginerr
+func TurnOnRentalServer(ctx context.Context, gu *g79.G79User, name string, timeout time.Duration) *gin.Error {
+	return turnRentalServer(ctx, gu, name, RentalServerStatusRunning, timeout)
+}
+
+func TurnOffRentalServer(ctx context.Context, gu *g79.G79User, name string, timeout time.Duration) *gin.Error {
+	return turnRentalServer(ctx, gu, name, RentalServerStatusStopped, timeout)
+}
+
+func turnRentalServer(parent context.Context, gu *g79.G79User, name string, status int, timeout time.Duration) *gin.Error {
+	ctx, cancel := context.WithTimeout(parent, timeout)
+	defer cancel()
+	infos, err := QueryMyRentalServers(ctx, gu)
+	if err != nil {
+		return err
 	}
-	// 2. Get entity id by name
-	for _, serverInfo := range serverInfos {
-		if serverInfo.Name == name {
-			return updateRentalServerAndWaitFinished(gu, serverInfo.EntityID, RentalServerStatusStopped, timeout)
+	for _, info := range infos {
+		if info.Name == name {
+			return updateRentalServer(ctx, gu, info.EntityID, status, timeout)
 		}
 	}
 	return giner.NewPublicGinError("未查找到服务器")
 }
 
-func SetRentalServerLevelLimitation(gu *g79.G79User, name string, level int) *gin.Error {
+func SetRentalServerLevelLimitation(ctx context.Context, gu *g79.G79User, name string, level int) *gin.Error {
 	// 0. Check level
 	if level < 0 || level > 50 {
 		return giner.NewPublicGinError("不在可设置范围内")
 	}
 	// 1. Query all rental servers
-	serverInfos, ginerr := QueryMyRentalServers(gu)
+	serverInfos, ginerr := QueryMyRentalServers(ctx, gu)
 	if ginerr != nil {
 		return ginerr
 	}
@@ -280,7 +252,7 @@ func SetRentalServerLevelLimitation(gu *g79.G79User, name string, level int) *gi
 				"server_id": serverInfo.EntityID,
 				"min_level": level,
 			})
-			_, protocolErr := gu.CreateHttpClient().
+			_, protocolErr := gu.CreateHttpClient(ctx).
 				SetMethod(http.MethodPost).
 				SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/my-rental-server/update").
 				SetRawBody(reqBody).
@@ -292,7 +264,7 @@ func SetRentalServerLevelLimitation(gu *g79.G79User, name string, level int) *gi
 	return giner.NewPublicGinError("未查找到服务器")
 }
 
-func SetRentalServerPasswordCode(gu *g79.G79User, name string, password string) *gin.Error {
+func SetRentalServerPasswordCode(ctx context.Context, gu *g79.G79User, name string, password string) *gin.Error {
 	// 0. Check password
 	if len(password) != 6 {
 		return giner.NewPublicGinError("密码必须为6位数字")
@@ -301,7 +273,7 @@ func SetRentalServerPasswordCode(gu *g79.G79User, name string, password string) 
 		return giner.NewPublicGinError("密码必须为6位数字")
 	}
 	// 1. Query all rental servers
-	serverInfos, ginerr := QueryMyRentalServers(gu)
+	serverInfos, ginerr := QueryMyRentalServers(ctx, gu)
 	if ginerr != nil {
 		return ginerr
 	}
@@ -312,7 +284,7 @@ func SetRentalServerPasswordCode(gu *g79.G79User, name string, password string) 
 				"server_id": serverInfo.EntityID,
 				"pwd":       password,
 			})
-			_, protocolErr := gu.CreateHttpClient().
+			_, protocolErr := gu.CreateHttpClient(ctx).
 				SetMethod(http.MethodPost).
 				SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/my-rental-server/update").
 				SetRawBody(reqBody).
@@ -324,13 +296,13 @@ func SetRentalServerPasswordCode(gu *g79.G79User, name string, password string) 
 	return giner.NewPublicGinError("未查找到服务器")
 }
 
-func SetRentalServerVisibility(gu *g79.G79User, name string, visibility int) *gin.Error {
+func SetRentalServerVisibility(ctx context.Context, gu *g79.G79User, name string, visibility int) *gin.Error {
 	// 0. Check visibility
 	if visibility < 0 || visibility > 2 {
 		return giner.NewPublicGinError("不在可设置范围内")
 	}
 	// 1. Query all rental servers
-	serverInfos, ginerr := QueryMyRentalServers(gu)
+	serverInfos, ginerr := QueryMyRentalServers(ctx, gu)
 	if ginerr != nil {
 		return ginerr
 	}
@@ -341,7 +313,7 @@ func SetRentalServerVisibility(gu *g79.G79User, name string, visibility int) *gi
 				"server_id":  serverInfo.EntityID,
 				"visibility": visibility,
 			})
-			_, protocolErr := gu.CreateHttpClient().
+			_, protocolErr := gu.CreateHttpClient(ctx).
 				SetMethod(http.MethodPost).
 				SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/my-rental-server/update").
 				SetRawBody(reqBody).
@@ -361,12 +333,12 @@ type RentalServerBackupInfo struct {
 	IsProcessing bool   `json:"is_processing"` // 是否正在处理
 }
 
-func QueryRentalServerBackupInfo(gu *g79.G79User, worldID, serverID string) ([]*RentalServerBackupInfo, *gin.Error) {
+func QueryRentalServerBackupInfo(ctx context.Context, gu *g79.G79User, worldID, serverID string) ([]*RentalServerBackupInfo, *gin.Error) {
 	reqBody, _ := json.Marshal(map[string]any{
 		"world_id": worldID,
 		"sid":      serverID,
 	})
-	reader, protocolErr := gu.CreateHttpClient().
+	reader, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/rental-server-backup/query/search-by-server").
 		SetRawBody(reqBody).
@@ -385,13 +357,13 @@ func QueryRentalServerBackupInfo(gu *g79.G79User, worldID, serverID string) ([]*
 	return query.Entities, nil
 }
 
-func CreateRentalServerBackup(gu *g79.G79User, name string, backupSlot int, backupName string) *gin.Error {
+func CreateRentalServerBackup(ctx context.Context, gu *g79.G79User, name string, backupSlot int, backupName string) *gin.Error {
 	// 0. Check backup slot
 	if backupSlot < 1 || backupSlot > 5 {
 		return giner.NewPublicGinError("备份槽位不在可使用范围内")
 	}
 	// 1. Query all rental servers
-	serverInfos, ginerr := QueryMyRentalServers(gu)
+	serverInfos, ginerr := QueryMyRentalServers(ctx, gu)
 	if ginerr != nil {
 		return ginerr
 	}
@@ -405,7 +377,7 @@ func CreateRentalServerBackup(gu *g79.G79User, name string, backupSlot int, back
 				"backup_name": backupName,
 				"sid":         serverInfo.EntityID,
 			})
-			_, protocolErr := gu.CreateHttpClient().
+			_, protocolErr := gu.CreateHttpClient(ctx).
 				SetMethod(http.MethodPost).
 				SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/rental-server-backup-upload/create-async").
 				SetRawBody(reqBody).
@@ -420,20 +392,20 @@ func CreateRentalServerBackup(gu *g79.G79User, name string, backupSlot int, back
 	return giner.NewPublicGinError("未查找到服务器")
 }
 
-func QueryRentalServerBackup(gu *g79.G79User, name string) ([]*RentalServerBackupInfo, *gin.Error) {
-	serverInfos, ginerr := QueryMyRentalServers(gu)
+func QueryRentalServerBackup(ctx context.Context, gu *g79.G79User, name string) ([]*RentalServerBackupInfo, *gin.Error) {
+	serverInfos, ginerr := QueryMyRentalServers(ctx, gu)
 	if ginerr != nil {
 		return nil, ginerr
 	}
 	for _, serverInfo := range serverInfos {
 		if serverInfo.Name == name {
-			return QueryRentalServerBackupInfo(gu, serverInfo.WorldID, serverInfo.EntityID)
+			return QueryRentalServerBackupInfo(ctx, gu, serverInfo.WorldID, serverInfo.EntityID)
 		}
 	}
 	return nil, giner.NewPublicGinError("未查找到服务器")
 }
 
-func QueryRentalServerPlayerList(gu *g79.G79User, status *int, serverID string, orderType int, isOnline *bool, length *int, offset int) ([]map[string]any, *gin.Error) {
+func QueryRentalServerPlayerList(ctx context.Context, gu *g79.G79User, status *int, serverID string, orderType int, isOnline *bool, length *int, offset int) ([]map[string]any, *gin.Error) {
 	reqBody, _ := json.Marshal(map[string]any{
 		"status":     status,
 		"server_id":  serverID,
@@ -442,7 +414,7 @@ func QueryRentalServerPlayerList(gu *g79.G79User, status *int, serverID string, 
 		"length":     length,
 		"offset":     offset,
 	})
-	reader, protocolErr := gu.CreateHttpClient().
+	reader, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/rental-server-player/query/search-by-server").
 		SetRawBody(reqBody).
@@ -460,13 +432,13 @@ func QueryRentalServerPlayerList(gu *g79.G79User, status *int, serverID string, 
 	return query.Entities, nil
 }
 
-func UpdateRentalServerPlayerBanStatus(gu *g79.G79User, serverID string, uid string, status int) *gin.Error {
+func UpdateRentalServerPlayerBanStatus(ctx context.Context, gu *g79.G79User, serverID string, uid string, status int) *gin.Error {
 	reqBody, _ := json.Marshal(map[string]any{
 		"sid":    serverID,
 		"uid":    uid,
 		"status": status,
 	})
-	_, protocolErr := gu.CreateHttpClient().
+	_, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/rental-server-player/update-server-player").
 		SetRawBody(reqBody).
@@ -475,11 +447,11 @@ func UpdateRentalServerPlayerBanStatus(gu *g79.G79User, serverID string, uid str
 	return giner.NewGinErrorFromProtocolErr(protocolErr)
 }
 
-func KickRentalServerPlayer(gu *g79.G79User, serverID string, uid string) *gin.Error {
+func KickRentalServerPlayer(ctx context.Context, gu *g79.G79User, serverID string, uid string) *gin.Error {
 	// Query player list
 	isOnline := true
 	status := 0
-	playerList, ginerr := QueryRentalServerPlayerList(gu, &status, serverID, 0, &isOnline, nil, 0)
+	playerList, ginerr := QueryRentalServerPlayerList(ctx, gu, &status, serverID, 0, &isOnline, nil, 0)
 	if ginerr != nil {
 		return ginerr
 	}
@@ -496,7 +468,7 @@ func KickRentalServerPlayer(gu *g79.G79User, serverID string, uid string) *gin.E
 				"entity_id": entityId,
 				"is_online": false,
 			})
-			_, protocolErr := gu.CreateHttpClient().
+			_, protocolErr := gu.CreateHttpClient(ctx).
 				SetMethod(http.MethodPost).
 				SetUrl(gameinfo.G79Servers.Load().WebServerUrl + "/rental-server-player/update").
 				SetRawBody(reqBody).

@@ -36,7 +36,7 @@ func (*RealmsServer) InviteCodeRemove(c *gin.Context) {
 		c.Error(ginerr)
 		return
 	}
-	if ginerr = g79.RemoveRealmsServerInviteCode(gu, req.ServerID, req.Code); ginerr != nil {
+	if ginerr = g79.RemoveRealmsServerInviteCode(c.Request.Context(), gu, req.ServerID, req.Code); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

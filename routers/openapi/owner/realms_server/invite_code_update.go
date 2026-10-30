@@ -37,7 +37,7 @@ func (*RealmsServer) InviteCodeUpdate(c *gin.Context) {
 		c.Error(ginerr)
 		return
 	}
-	if ginerr = g79.UpdateRealmsServerInviteCode(gu, req.ServerID, req.Code, *req.ShareText); ginerr != nil {
+	if ginerr = g79.UpdateRealmsServerInviteCode(c.Request.Context(), gu, req.ServerID, req.Code, *req.ShareText); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

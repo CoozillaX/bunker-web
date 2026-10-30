@@ -4,28 +4,29 @@ import (
 	"bunker-core/protocol/g79"
 	"bunker-core/protocol/gameinfo"
 	"bunker-web/pkg/giner"
+	"context"
 	"encoding/json"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func QueryRealmsServer(gu *g79.G79User, serverCode string) (map[string]any, *gin.Error) {
-	details, protocolErr := gu.QueryRealmsServer(serverCode)
+func QueryRealmsServer(ctx context.Context, gu *g79.G79User, serverCode string) (map[string]any, *gin.Error) {
+	details, protocolErr := gu.QueryRealmsServer(ctx, serverCode)
 	if protocolErr != nil {
 		return nil, giner.NewGinErrorFromProtocolErr(protocolErr)
 	}
 	return details, nil
 }
 
-func QueryRealmsServerOnlinePlayers(gu *g79.G79User, serverID string, offset, length, orderType int) ([]map[string]any, *gin.Error) {
+func QueryRealmsServerOnlinePlayers(ctx context.Context, gu *g79.G79User, serverID string, offset, length, orderType int) ([]map[string]any, *gin.Error) {
 	reqBody, _ := json.Marshal(map[string]any{
 		"sid":        serverID,
 		"offset":     offset,
 		"length":     length,
 		"order_type": orderType,
 	})
-	reader, protocolErr := gu.CreateHttpClient().
+	reader, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + "/domain-server/get-online-players").
 		SetRawBody(reqBody).
@@ -45,19 +46,19 @@ func QueryRealmsServerOnlinePlayers(gu *g79.G79User, serverID string, offset, le
 	return query.Entity, nil
 }
 
-func TurnOnRealmsServer(gu *g79.G79User, serverID string) *gin.Error {
-	return updateRealmsServerStatus(gu, serverID, "/domain-server/start-server")
+func TurnOnRealmsServer(ctx context.Context, gu *g79.G79User, serverID string) *gin.Error {
+	return updateRealmsServerStatus(ctx, gu, serverID, "/domain-server/start-server")
 }
 
-func TurnOffRealmsServer(gu *g79.G79User, serverID string) *gin.Error {
-	return updateRealmsServerStatus(gu, serverID, "/domain-server/stop-server")
+func TurnOffRealmsServer(ctx context.Context, gu *g79.G79User, serverID string) *gin.Error {
+	return updateRealmsServerStatus(ctx, gu, serverID, "/domain-server/stop-server")
 }
 
-func updateRealmsServerStatus(gu *g79.G79User, serverID, endpoint string) *gin.Error {
+func updateRealmsServerStatus(ctx context.Context, gu *g79.G79User, serverID, endpoint string) *gin.Error {
 	reqBody, _ := json.Marshal(map[string]any{
 		"sid": serverID,
 	})
-	_, protocolErr := gu.CreateHttpClient().
+	_, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + endpoint).
 		SetRawBody(reqBody).
@@ -76,11 +77,11 @@ type RealmsServerBlocklistPlayer struct {
 	CreateTime int64  `json:"create_time"` // 加入黑名单时间
 }
 
-func QueryRealmsServerBlocklist(gu *g79.G79User, serverID string) ([]RealmsServerBlocklistPlayer, *gin.Error) {
+func QueryRealmsServerBlocklist(ctx context.Context, gu *g79.G79User, serverID string) ([]RealmsServerBlocklistPlayer, *gin.Error) {
 	reqBody, _ := json.Marshal(map[string]any{
 		"sid": serverID,
 	})
-	reader, protocolErr := gu.CreateHttpClient().
+	reader, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + "/domain-server/get-blacklist").
 		SetRawBody(reqBody).
@@ -98,20 +99,20 @@ func QueryRealmsServerBlocklist(gu *g79.G79User, serverID string) ([]RealmsServe
 	return query.Entities, nil
 }
 
-func AddRealmsServerBlocklistPlayer(gu *g79.G79User, serverID, uid string) *gin.Error {
-	return updateRealmsServerBlocklist(gu, serverID, uid, "/domain-server/add-to-blacklist")
+func AddRealmsServerBlocklistPlayer(ctx context.Context, gu *g79.G79User, serverID, uid string) *gin.Error {
+	return updateRealmsServerBlocklist(ctx, gu, serverID, uid, "/domain-server/add-to-blacklist")
 }
 
-func RemoveRealmsServerBlocklistPlayer(gu *g79.G79User, serverID, uid string) *gin.Error {
-	return updateRealmsServerBlocklist(gu, serverID, uid, "/domain-server/remove-from-blacklist")
+func RemoveRealmsServerBlocklistPlayer(ctx context.Context, gu *g79.G79User, serverID, uid string) *gin.Error {
+	return updateRealmsServerBlocklist(ctx, gu, serverID, uid, "/domain-server/remove-from-blacklist")
 }
 
-func updateRealmsServerBlocklist(gu *g79.G79User, serverID, uid, endpoint string) *gin.Error {
+func updateRealmsServerBlocklist(ctx context.Context, gu *g79.G79User, serverID, uid, endpoint string) *gin.Error {
 	reqBody, _ := json.Marshal(map[string]any{
 		"sid": serverID,
 		"fid": uid,
 	})
-	_, protocolErr := gu.CreateHttpClient().
+	_, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + endpoint).
 		SetRawBody(reqBody).
@@ -131,11 +132,11 @@ type RealmsServerInviteCode struct {
 	Permission string `json:"permission"` // 加入后的权限
 }
 
-func QueryRealmsServerInviteCodes(gu *g79.G79User, serverID string) ([]RealmsServerInviteCode, *gin.Error) {
+func QueryRealmsServerInviteCodes(ctx context.Context, gu *g79.G79User, serverID string) ([]RealmsServerInviteCode, *gin.Error) {
 	reqBody, _ := json.Marshal(map[string]any{
 		"sid": serverID,
 	})
-	reader, protocolErr := gu.CreateHttpClient().
+	reader, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + "/domain-server/get-invite-code-list").
 		SetRawBody(reqBody).
@@ -153,11 +154,11 @@ func QueryRealmsServerInviteCodes(gu *g79.G79User, serverID string) ([]RealmsSer
 	return query.Entities, nil
 }
 
-func GenerateRealmsServerInviteCode(gu *g79.G79User, serverID string) (string, *gin.Error) {
+func GenerateRealmsServerInviteCode(ctx context.Context, gu *g79.G79User, serverID string) (string, *gin.Error) {
 	reqBody, _ := json.Marshal(map[string]any{
 		"sid": serverID,
 	})
-	reader, protocolErr := gu.CreateHttpClient().
+	reader, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + "/domain-server/generate-invite-code").
 		SetRawBody(reqBody).
@@ -175,15 +176,15 @@ func GenerateRealmsServerInviteCode(gu *g79.G79User, serverID string) (string, *
 	return query.Entity, nil
 }
 
-func RemoveRealmsServerInviteCode(gu *g79.G79User, serverID, code string) *gin.Error {
-	return updateRealmsServerInviteCode(gu, serverID, code, nil, "/domain-server/remove-invite-code")
+func RemoveRealmsServerInviteCode(ctx context.Context, gu *g79.G79User, serverID, code string) *gin.Error {
+	return updateRealmsServerInviteCode(ctx, gu, serverID, code, nil, "/domain-server/remove-invite-code")
 }
 
-func UpdateRealmsServerInviteCode(gu *g79.G79User, serverID, code, shareText string) *gin.Error {
-	return updateRealmsServerInviteCode(gu, serverID, code, &shareText, "/domain-server/update-invite-code")
+func UpdateRealmsServerInviteCode(ctx context.Context, gu *g79.G79User, serverID, code, shareText string) *gin.Error {
+	return updateRealmsServerInviteCode(ctx, gu, serverID, code, &shareText, "/domain-server/update-invite-code")
 }
 
-func updateRealmsServerInviteCode(gu *g79.G79User, serverID, code string, shareText *string, endpoint string) *gin.Error {
+func updateRealmsServerInviteCode(ctx context.Context, gu *g79.G79User, serverID, code string, shareText *string, endpoint string) *gin.Error {
 	req := map[string]any{
 		"sid":  serverID,
 		"code": code,
@@ -192,7 +193,7 @@ func updateRealmsServerInviteCode(gu *g79.G79User, serverID, code string, shareT
 		req["share_text"] = *shareText
 	}
 	reqBody, _ := json.Marshal(req)
-	_, protocolErr := gu.CreateHttpClient().
+	_, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + endpoint).
 		SetRawBody(reqBody).
@@ -204,11 +205,11 @@ func updateRealmsServerInviteCode(gu *g79.G79User, serverID, code string, shareT
 	return nil
 }
 
-func QueryRealmsServerMembers(gu *g79.G79User, serverID string) ([]map[string]any, *gin.Error) {
+func QueryRealmsServerMembers(ctx context.Context, gu *g79.G79User, serverID string) ([]map[string]any, *gin.Error) {
 	reqBody, _ := json.Marshal(map[string]any{
 		"sid": serverID,
 	})
-	reader, protocolErr := gu.CreateHttpClient().
+	reader, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + "/domain-server/get-server-members").
 		SetRawBody(reqBody).
@@ -228,39 +229,39 @@ func QueryRealmsServerMembers(gu *g79.G79User, serverID string) ([]map[string]an
 	return query.Entities, nil
 }
 
-func RemoveRealmsServerMember(gu *g79.G79User, serverID, uid string, removeAll bool) *gin.Error {
+func RemoveRealmsServerMember(ctx context.Context, gu *g79.G79User, serverID, uid string, removeAll bool) *gin.Error {
 	reqBody, _ := json.Marshal(map[string]any{
 		"sid":        serverID,
 		"fid":        uid,
 		"remove_all": removeAll,
 	})
-	return requestRealmsServerMemberUpdate(gu, reqBody, "/domain-server/remove-server-member")
+	return requestRealmsServerMemberUpdate(ctx, gu, reqBody, "/domain-server/remove-server-member")
 }
 
-func SetRealmsServerMemberPermission(gu *g79.G79User, serverID, uid, permission string) *gin.Error {
+func SetRealmsServerMemberPermission(ctx context.Context, gu *g79.G79User, serverID, uid, permission string) *gin.Error {
 	reqBody, _ := json.Marshal(map[string]any{
 		"sid":        serverID,
 		"player_uid": uid,
 		"permission": permission,
 	})
-	return requestRealmsServerMemberUpdate(gu, reqBody, "/domain-server/set-player-permission")
+	return requestRealmsServerMemberUpdate(ctx, gu, reqBody, "/domain-server/set-player-permission")
 }
 
-func InviteRealmsServerMember(gu *g79.G79User, serverID, uid, permission string) *gin.Error {
+func InviteRealmsServerMember(ctx context.Context, gu *g79.G79User, serverID, uid, permission string) *gin.Error {
 	reqBody, _ := json.Marshal(map[string]any{
 		"sid":         serverID,
 		"fid":         uid,
 		"permission":  permission,
 		"invite_type": "1",
 	})
-	return requestRealmsServerMemberUpdate(gu, reqBody, "/domain-server/invite-friend")
+	return requestRealmsServerMemberUpdate(ctx, gu, reqBody, "/domain-server/invite-friend")
 }
 
-func QueryRealmsServerMemberInvites(gu *g79.G79User, serverID string) ([]map[string]any, *gin.Error) {
+func QueryRealmsServerMemberInvites(ctx context.Context, gu *g79.G79User, serverID string) ([]map[string]any, *gin.Error) {
 	reqBody, _ := json.Marshal(map[string]any{
 		"sid": serverID,
 	})
-	reader, protocolErr := gu.CreateHttpClient().
+	reader, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + "/domain-server/get-owner-invitations").
 		SetRawBody(reqBody).
@@ -280,25 +281,25 @@ func QueryRealmsServerMemberInvites(gu *g79.G79User, serverID string) ([]map[str
 	return query.Entities, nil
 }
 
-func UpdateRealmsServerMemberInvite(gu *g79.G79User, serverID, uid, permission string) *gin.Error {
+func UpdateRealmsServerMemberInvite(ctx context.Context, gu *g79.G79User, serverID, uid, permission string) *gin.Error {
 	reqBody, _ := json.Marshal(map[string]any{
 		"sid":        serverID,
 		"fid":        uid,
 		"permission": permission,
 	})
-	return requestRealmsServerMemberUpdate(gu, reqBody, "/domain-server/update-invitation")
+	return requestRealmsServerMemberUpdate(ctx, gu, reqBody, "/domain-server/update-invitation")
 }
 
-func RemoveRealmsServerMemberInvite(gu *g79.G79User, serverID, uid string) *gin.Error {
+func RemoveRealmsServerMemberInvite(ctx context.Context, gu *g79.G79User, serverID, uid string) *gin.Error {
 	reqBody, _ := json.Marshal(map[string]any{
 		"sid": serverID,
 		"fid": uid,
 	})
-	return requestRealmsServerMemberUpdate(gu, reqBody, "/domain-server/withdraw-invitation")
+	return requestRealmsServerMemberUpdate(ctx, gu, reqBody, "/domain-server/withdraw-invitation")
 }
 
-func requestRealmsServerMemberUpdate(gu *g79.G79User, reqBody []byte, endpoint string) *gin.Error {
-	_, protocolErr := gu.CreateHttpClient().
+func requestRealmsServerMemberUpdate(ctx context.Context, gu *g79.G79User, reqBody []byte, endpoint string) *gin.Error {
+	_, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + endpoint).
 		SetRawBody(reqBody).
@@ -310,24 +311,24 @@ func requestRealmsServerMemberUpdate(gu *g79.G79User, reqBody []byte, endpoint s
 	return nil
 }
 
-func QueryRealmsServerApplications(gu *g79.G79User, serverID string) (map[string]any, *gin.Error) {
+func QueryRealmsServerApplications(ctx context.Context, gu *g79.G79User, serverID string) (map[string]any, *gin.Error) {
 	reqBody, _ := json.Marshal(map[string]any{
 		"sid": serverID,
 	})
-	return requestRealmsServerApplication(gu, reqBody, "/domain-server/owner-get-application-queue")
+	return requestRealmsServerApplication(ctx, gu, reqBody, "/domain-server/owner-get-application-queue")
 }
 
-func ApproveRealmsServerApplications(gu *g79.G79User, serverID string, action int, items []map[string]any) (map[string]any, *gin.Error) {
+func ApproveRealmsServerApplications(ctx context.Context, gu *g79.G79User, serverID string, action int, items []map[string]any) (map[string]any, *gin.Error) {
 	reqBody, _ := json.Marshal(map[string]any{
 		"sid":    serverID,
 		"action": action,
 		"items":  items,
 	})
-	return requestRealmsServerApplication(gu, reqBody, "/domain-server/owner-approve-application-queue")
+	return requestRealmsServerApplication(ctx, gu, reqBody, "/domain-server/owner-approve-application-queue")
 }
 
-func requestRealmsServerApplication(gu *g79.G79User, reqBody []byte, endpoint string) (map[string]any, *gin.Error) {
-	reader, protocolErr := gu.CreateHttpClient().
+func requestRealmsServerApplication(ctx context.Context, gu *g79.G79User, reqBody []byte, endpoint string) (map[string]any, *gin.Error) {
+	reader, protocolErr := gu.CreateHttpClient(ctx).
 		SetMethod(http.MethodPost).
 		SetUrl(gameinfo.G79Servers.Load().ApiGatewayUrl + endpoint).
 		SetRawBody(reqBody).

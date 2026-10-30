@@ -40,7 +40,7 @@ func (*BindAccount) GetQRCode(c *gin.Context) {
 	// Try to request code
 	uuid, image, protocolErr := usr.HelperMpayUser.QRCodeLoginGetUUID()
 	if protocolErr != nil {
-		c.JSON(http.StatusOK, giner.MakeHTTPResponse(false).SetData(
+		c.JSON(http.StatusOK, giner.MakeHTTPResponse(false).SetMessage(protocolErr.Message).SetData(
 			&GetQRCodeResponseData{
 				VerifyUrl: protocolErr.VerifyUrl,
 			},

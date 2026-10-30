@@ -41,7 +41,7 @@ func (*RealmsServer) ApplicationQuery(c *gin.Context) {
 		c.Error(ginerr)
 		return
 	}
-	result, ginerr := g79.QueryRealmsServerApplications(gu, req.ServerID)
+	result, ginerr := g79.QueryRealmsServerApplications(c.Request.Context(), gu, req.ServerID)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return

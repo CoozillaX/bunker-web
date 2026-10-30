@@ -24,18 +24,18 @@ func (*Owner) GetMailReward(c *gin.Context) {
 	// Store to DB
 	defer models.DBSave(usr.OwnerMpayUser)
 	// Get all mails
-	mailList, ginerr := g79.GetGeneralMailList(gu)
+	mailList, ginerr := g79.GetGeneralMailList(c.Request.Context(), gu)
 	if ginerr != nil {
 		c.Error(ginerr)
 		return
 	}
 	// Read all mails
-	if ginerr := g79.ReadMails(gu, mailList); ginerr != nil {
+	if ginerr := g79.ReadMails(c.Request.Context(), gu, mailList); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}
 	// Claim all rewards
-	if ginerr := g79.ClaimMailRewards(gu, mailList); ginerr != nil {
+	if ginerr := g79.ClaimMailRewards(c.Request.Context(), gu, mailList); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

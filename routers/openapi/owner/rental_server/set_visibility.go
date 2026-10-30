@@ -38,7 +38,7 @@ func (*RentalServer) SetVisibility(c *gin.Context) {
 		return
 	}
 	// Try to set level limitation
-	if ginerr := g79.SetRentalServerVisibility(gu, req.ServerCode, req.Visibility); ginerr != nil {
+	if ginerr := g79.SetRentalServerVisibility(c.Request.Context(), gu, req.ServerCode, req.Visibility); ginerr != nil {
 		c.Error(ginerr)
 		return
 	}

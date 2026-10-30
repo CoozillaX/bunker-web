@@ -1,15 +1,14 @@
 package main
 
 import (
-	"bunker-core/protocol/mpay/android"
-	"bunker-core/protocol/mpay/windows"
 	"bunker-web/configs"
+	"bunker-web/pkg/resources"
 	"bunker-web/routers"
+	"context"
 	"fmt"
 	"os"
 
 	"runtime/debug"
-	"sync"
 	"time"
 )
 
@@ -31,37 +30,14 @@ func handlePanic() {
 	}
 }
 
-func warmPublishedPackages() {
-	var wg sync.WaitGroup
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		if err := (&android.AndroidMpayUser{}).UsePublishedPackage(); err != nil {
-			fmt.Println("android package:", err)
-		}
-	}()
-	go func() {
-		defer wg.Done()
-		if err := (&windows.WindowsMpayUser{}).UsePublishedPackage(); err != nil {
-			fmt.Println("windows package:", err)
-		}
-	}()
-	wg.Wait()
-}
-
 // @title			BunkerWeb OpenAPI
 // @description	BunkerWeb OpenAPI document, feel free to contact us if you have any questions or suggestions.
 func main() {
 	defer handlePanic()
 
-	// Warm the packages without holding the server back. A request that needs
-	// one loads it on use, waiting for this warm-up if it is still running, so
-	// a slow CDN only delays those requests instead of keeping the API offline.
-	fmt.Println("Loading published packages in the background...")
-	go func() {
-		warmPublishedPackages()
-		fmt.Println("Published package warm-up finished")
-	}()
+	// Requests read the existing package caches. Workers refresh both platforms at
+	// startup and keep checking for updates even when there is no user traffic.
+	resources.Start(context.Background())
 
 	router := routers.InitRouter()
 
